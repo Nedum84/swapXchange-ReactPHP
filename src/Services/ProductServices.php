@@ -12,6 +12,23 @@ use App\Database;
 final class ProductServices{
     private $db;
     private $database;
+    private const radius = 2522;
+
+    private function SelectQuery($limit, $offset, $user_lat, $user_long, $product_status = 1, $extra){
+        return "SELECT *, 
+                (((acos(sin(('$user_lat'*pi()/180)) * 
+                sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
+                * 
+                cos((`user_address_lat`*pi()/180)) * 
+                cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
+                AS distance
+
+            from product 
+            WHERE product_status = '$product_status' $extra
+            having distance < '$radius' 
+                ORDER BY id DESC LIMIT $limit OFFSET $offset 
+            ";
+    }
 
     public function __construct(Database $database){
         $this->db = $database->db;
@@ -22,16 +39,41 @@ final class ProductServices{
         $userServices = new \App\Services\UserServices($this->database);
         
         return $userServices->findOne($user_id)->then(function ($user) use ($offset, $limit){
+            
 
             $query = "SELECT * FROM product ORDER BY id DESC LIMIT ? OFFSET ?";
-            return $this->db->query($query,[$limit, $offset])
+            
+	        $radius = 2522;//in KM
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+            $status_active = 1;
+
+            $query = "SELECT *, 
+                (((acos(sin(('$user_lat'*pi()/180)) * 
+                sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
+                * 
+                cos((`user_address_lat`*pi()/180)) * 
+                cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
+                AS distance
+
+            from product 
+            WHERE product_status = '$status_active'
+            having distance < '$radius' 
+                ORDER BY id DESC LIMIT $limit OFFSET $offset 
+            ";
+
+            // return $this->db->query($query,[$limit, $offset])
+            return $this->db->query($query)
             ->then(function (QueryResult $queryResult) {
                 return $queryResult->resultRows;
+            },function ($er){
+                throw new Exception($er);
             });
         });
     }
 
-    public function findOne(string $id): PromiseInterface{
+    public function findCategory(string $id): PromiseInterface{
         return $this->db->query('SELECT * FROM product WHERE id = ?', [$id])
             ->then(function (QueryResult $result) {
                 if (empty($result->resultRows)) {

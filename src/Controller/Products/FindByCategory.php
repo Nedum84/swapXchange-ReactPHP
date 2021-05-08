@@ -8,7 +8,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use React\Http\Message\Response;
 use App\Services\ProductServices;
 
-final class FindAll{
+final class FindByCategory{
     private $productServices;
 
     public function __construct(Database $db){
