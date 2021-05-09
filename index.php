@@ -1,5 +1,4 @@
 <?php
-
 use FastRoute\DataGenerator\GroupCountBased;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std;
@@ -13,13 +12,7 @@ use App\JWTAuth\JwtEncoder;
 use App\JWTAuth\Guard;
 
 
-
 require __DIR__ . '/vendor/autoload.php';
-
-
-// $user = "provxyzx_pgmi_user";
-// $pass = 'uWA*~$;${M4a';
-// $db = "provxyzx_provinceofgrace_org_datas";
 
 $user = "ned";
 $pass = "ned";
@@ -39,32 +32,20 @@ $authenticator = new JwtAuthenticator(new JwtEncoder());
 $routes = new RouteCollector(new Std(), new GroupCountBased());
 
 $routes->addGroup('/v1', function (RouteCollector $v1Routes) use ($dbCon, $routes) {
-    //Products
-    $routes->addGroup('/products', function (RouteCollector $r) use ($dbCon, $v1Routes) {
-        new \App\Routes\ProductRoutes($r, $dbCon);
-    });
-});
-// //Products
-// $routes->addGroup('/products', function (RouteCollector $r) use ($dbCon) {
-//     new \App\Routes\ProductRoutes($r, $dbCon);
-// });
-//Users
-$routes->addGroup('/users', function (RouteCollector $r) use ($dbCon) {
-    new \App\Routes\UserRoutes($r, $dbCon);
-});
-//Users
-$routes->addGroup('/token', function (RouteCollector $r) use ($dbCon) {
-    new \App\Routes\TokenRoutes($r, $dbCon);
+    //Route to v1
+    new \App\Routes\v1\RoutesIndex($v1Routes, $dbCon);
+    // new \App\Routes\v1\RoutesIndex($routes, $dbCon);
 });
 
 // Add jwt auth middleware... 
-$auth = new Guard('/products', $authenticator);
-$auth2 = new Guard('/userz', $authenticator);
+$auth = new Guard('/v1/products', $authenticator);
+$auth2 = new Guard('/v1/userz', $authenticator);
 
 
-// $server = new React\Http\Server($loop, $auth, $auth2, new \App\Router($routes));
+// Add routes to the server
 $server = new React\Http\Server($loop, $auth, new \App\Router($routes));
 
+//open the socket
 $socket = new \React\Socket\Server(8088, $loop);
 
 $server->listen($socket);
@@ -74,18 +55,7 @@ $server->on('error', function (Exception $exception) {
 });
 
 echo 'Listening on ' . str_replace('tcp:', 'http:', $socket->getAddress()) . "\n";
-// for socket connections... 
-// $socket->on('connection', function (React\Socket\ConnectionInterface $connection) {
-//     $connection->write("Hello " . $connection->getRemoteAddress() . "!\n");
-//     $connection->write("Welcome to this amazing server!\n");
-//     $connection->write("Here's a tip: don't say anything.\n");
-//     $connection->write("Here's a tip: don't say anything 2.\n");
-//     $connection->write("Here's a tip: don't say anything 3.\n");
 
-//     $connection->on('data', function ($data) use ($connection) {
-//         $connection->close();
-//     });
-// });
 
 $payload = array(
     "iss" => "example.org",

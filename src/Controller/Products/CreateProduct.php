@@ -45,7 +45,7 @@ final class CreateProduct{
                     //Include product in the response data payload
                     return $this->productServices->findByProductId($product->product_id)->then(
                         function(array $product) {
-                        return JsonResponse::ok(["product" => $product]);
+                        return JsonResponse::created(["product" => $product]);
                     });
                 },
                 function ($error) {
