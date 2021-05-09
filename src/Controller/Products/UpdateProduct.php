@@ -46,8 +46,8 @@ final class UpdateProduct{
                         return JsonResponse::ok(["product" => $product]);
                     });
                 },
-                function (Exception $error) {
-                    return JsonResponse::badRequest($error->getMessage());
+                function ($error) {
+                    return JsonResponse::badRequest($error->getMessage()??$error);
                 }
             );
     }

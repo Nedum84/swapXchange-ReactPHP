@@ -12,21 +12,51 @@ use App\Database;
 final class ProductServices{
     private $db;
     private $database;
-    private const radius = 2522;
+    private const RADIUS = 2522;
+    private const ACTIVE_PRODUCT_STATUS = 1;
 
-    private function SelectQuery($limit, $offset, $user_lat, $user_long, $product_status = 1, $extra){
-        return "SELECT *, 
+    private function selectQuery(
+                        $limit, 
+                        $offset, 
+                        $user_lat, 
+                        $user_long, 
+                        $product_status = self::ACTIVE_PRODUCT_STATUS, 
+                        $extra="", 
+                        $orderBy=null){
+        $radius = self::RADIUS;
+        $orderBy = $orderBy??"ORDER BY id DESC";
+
+        return "SELECT product.*, 
                 (((acos(sin(('$user_lat'*pi()/180)) * 
                 sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
                 * 
                 cos((`user_address_lat`*pi()/180)) * 
                 cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
                 AS distance
+                ,JSON_EXTRACT(
+                        IFNULL(
+                            (SELECT
+                                CONCAT('[',
+                                        GROUP_CONCAT(
+                                            JSON_OBJECT(
+                                                'id',id,
+                                                'product_id',product_id,
+                                                'image_id',image_id,
+                                                'image_url',image_url
+                                            )
+                                        ),
+                                ']')
+                                FROM image_product WHERE  image_product.product_id = product.product_id
+                            ),
+                        '[]'),
+                    '$') AS images
+
 
             from product 
             WHERE product_status = '$product_status' $extra
             having distance < '$radius' 
-                ORDER BY id DESC LIMIT $limit OFFSET $offset 
+                $orderBy
+                LIMIT $limit OFFSET $offset 
             ";
     }
 
@@ -39,31 +69,14 @@ final class ProductServices{
         $userServices = new \App\Services\UserServices($this->database);
         
         return $userServices->findOne($user_id)->then(function ($user) use ($offset, $limit){
-            
 
-            $query = "SELECT * FROM product ORDER BY id DESC LIMIT ? OFFSET ?";
-            
-	        $radius = 2522;//in KM
             $user = (object)$user;
             $user_lat = $user->address_lat;
             $user_long = $user->address_long;
-            $status_active = 1;
+            $product_status = self::ACTIVE_PRODUCT_STATUS;
 
-            $query = "SELECT *, 
-                (((acos(sin(('$user_lat'*pi()/180)) * 
-                sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
-                * 
-                cos((`user_address_lat`*pi()/180)) * 
-                cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
-                AS distance
+            $query = $this->selectQuery($limit, $offset, $user_lat, $user_long, $product_status);
 
-            from product 
-            WHERE product_status = '$status_active'
-            having distance < '$radius' 
-                ORDER BY id DESC LIMIT $limit OFFSET $offset 
-            ";
-
-            // return $this->db->query($query,[$limit, $offset])
             return $this->db->query($query)
             ->then(function (QueryResult $queryResult) {
                 return $queryResult->resultRows;
@@ -73,16 +86,100 @@ final class ProductServices{
         });
     }
 
-    public function findCategory(string $id): PromiseInterface{
-        return $this->db->query('SELECT * FROM product WHERE id = ?', [$id])
-            ->then(function (QueryResult $result) {
-                if (empty($result->resultRows)) {
-                    return [];
-                }
+    public function findByCategory($user_id, $category, $offset, $limit): PromiseInterface{
+        $userServices = new \App\Services\UserServices($this->database);
+        
+        return $userServices->findOne($user_id)->then(function ($user) use ($offset, $limit, $category){
 
-                return $result->resultRows[0];
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+            $product_status = self::ACTIVE_PRODUCT_STATUS;
+
+            $extra = "AND category = $category";
+            $query = $this->selectQuery($limit, $offset, $user_lat, $user_long, $product_status, $extra);
+
+            return $this->db->query($query)
+            ->then(function (QueryResult $queryResult) {
+                return $queryResult->resultRows;
+            },function ($er){
+                throw new Exception($er);
             });
+        });
     }
+    public function findBySubCategory($user_id, $subcategory, $offset, $limit): PromiseInterface{
+        $userServices = new \App\Services\UserServices($this->database);
+        
+        return $userServices->findOne($user_id)->then(function ($user) use ($offset, $limit, $subcategory){
+
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+            $product_status = self::ACTIVE_PRODUCT_STATUS;
+
+            $extra = "AND sub_category = $subcategory";
+            $query = $this->selectQuery($limit, $offset, $user_lat, $user_long, $product_status, $extra);
+
+            return $this->db->query($query)
+            ->then(function (QueryResult $queryResult) {
+                return $queryResult->resultRows;
+            },function ($er){
+                throw new Exception($er);
+            });
+        });
+    }
+    public function findBySearch($user_id, $searchQuery, $filters, $offset, $limit): PromiseInterface{
+        $userServices = new \App\Services\UserServices($this->database);
+        
+        return $userServices->findOne($user_id)->then(function ($user) use ($offset, $limit, $searchQuery, $filters){
+
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+            $product_status = self::ACTIVE_PRODUCT_STATUS;
+
+            $extra = "AND product_name LIKE '%$searchQuery%' 
+                        OR category IN 
+                            (SELECT category_id FROM category WHERE category_name LIKE '%$searchQuery%' ) 
+                        OR sub_category IN 
+                            (SELECT sub_category_id FROM sub_category WHERE sub_category_name LIKE '%$searchQuery%' ) 
+                    ";
+
+            $orderBy = null;
+            if(!empty($filters)){
+                switch ($filters) {
+                    case 'best-match':
+                        $orderBy = "ORDER BY id DESC";
+                        break;
+                    case 'price-high':
+                        $orderBy = "ORDER BY price DESC";
+                        break;
+                    case 'price-low':
+                        $orderBy = "ORDER BY price ASC";
+                        break;
+                    case 'newest':
+                        $orderBy = "ORDER BY id DESC";
+                        break;
+                    case 'oldest':
+                        $orderBy = "ORDER BY id ASC";
+                        break;
+                                
+                    default:
+                        $orderBy = "ORDER BY id DESC";
+                        break;
+                }
+            }
+            $query = $this->selectQuery($limit, $offset, $user_lat, $user_long, $product_status, $extra, $orderBy);
+
+            return $this->db->query($query)
+            ->then(function (QueryResult $queryResult) {
+                return $queryResult->resultRows;
+            }, function ($er){
+                throw new Exception($er);
+            });
+        });
+    }
+
     public function findByProductId(string $pId): PromiseInterface{
         return $this->db->query('SELECT * FROM product WHERE product_id = ?', [$pId])
             ->then(function (QueryResult $result) {
@@ -92,6 +189,7 @@ final class ProductServices{
                 return $result->resultRows[0];
             });
     }
+
     public function delete(string $id): PromiseInterface{
         return $this->db
             ->query('DELETE FROM product WHERE id = ?', [$id])

@@ -16,13 +16,11 @@ final class FindOne{
     }
 
     public function __invoke(ServerRequestInterface $request, string $product_id){
-        try {
-            return $this->productServices->findByProductId($product_id)
-                ->then(function(array $product) {
-                    return JsonResponse::ok(["product" => $product]);
-                });
-          } catch (\Throwable $er) {
-            return JsonResponse::badRequest($er);
-          }
+        return $this->productServices->findByProductId($product_id)
+            ->then(function(array $product) {
+                return JsonResponse::ok(["product" => $product]);
+            },function ($er){
+                return JsonResponse::badRequest($er);
+        });
     }
 }

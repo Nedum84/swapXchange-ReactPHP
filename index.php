@@ -38,17 +38,16 @@ $authenticator = new JwtAuthenticator(new JwtEncoder());
 
 $routes = new RouteCollector(new Std(), new GroupCountBased());
 
-
-// $routes->get('/users', new \App\Controller\ListUsers($dbCon));
-// $routes->post('/users', new \App\Controller\CreateUser($dbCon));
-// $routes->get('/users/{id}', new \App\Controller\ViewUser($dbCon));
-// $routes->put('/users/{id}', new \App\Controller\UpdateUser($dbCon));
-// $routes->delete('/users/{id}', new \App\Controller\DeleteUser($dbCon));
-
-//Products
-$routes->addGroup('/products', function (RouteCollector $r) use ($dbCon) {
-    new \App\Routes\ProductRoutes($r, $dbCon);
+$routes->addGroup('/v1', function (RouteCollector $v1Routes) use ($dbCon, $routes) {
+    //Products
+    $routes->addGroup('/products', function (RouteCollector $r) use ($dbCon, $v1Routes) {
+        new \App\Routes\ProductRoutes($r, $dbCon);
+    });
 });
+// //Products
+// $routes->addGroup('/products', function (RouteCollector $r) use ($dbCon) {
+//     new \App\Routes\ProductRoutes($r, $dbCon);
+// });
 //Users
 $routes->addGroup('/users', function (RouteCollector $r) use ($dbCon) {
     new \App\Routes\UserRoutes($r, $dbCon);

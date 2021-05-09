@@ -15,12 +15,11 @@ final class FindByCategory{
         $this->productServices = new ProductServices($db);
     }
 
-    public function __invoke(ServerRequestInterface $request, int $offset=1, int $limit=10){
+    public function __invoke(ServerRequestInterface $request, int $category, int $offset=0, int $limit=10){
         $authPayload = \App\Utils\GetAuthPayload::getPayload($request);
         $user_id = $authPayload->user_id;
         
-
-        return $this->productServices->findAll($user_id, (int)$offset, (int)$limit)
+        return $this->productServices->findByCategory($user_id, (int)$category, (int)$offset, (int)$limit)
         ->then(function(array $products) {
             return JsonResponse::ok([ "products" => $products ]);
         },function ($er){

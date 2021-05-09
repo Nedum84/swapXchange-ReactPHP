@@ -7,7 +7,7 @@ use FastRoute\RouteCollector;
 // use App\Controller\Products\ProductController;
 use App\Database;
 
-final class ProductRoutes{
+final class RoutesIndex{
 
 
     private $routes;    
