@@ -30,7 +30,6 @@ final class CreateProduct{
         $product->product_suggestion = $body['product_suggestion'] ?? ''; 
         $product->product_condition    = $body['product_condition'] ?? ''; 
         $product->product_status    = $body['product_status'] ?? ''; 
-        $product->timestamp         = $body['timestamp'] ?? ''; 
         $product->user_id           = $body['user_id'] ?? ''; 
         $product->user_address      = $body['user_address'] ?? ''; 
         $product->user_address_city = $body['user_address_city'] ?? ''; 

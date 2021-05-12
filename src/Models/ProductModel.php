@@ -16,7 +16,6 @@ class ProductModel{
     public $product_suggestion;
     public $product_condition;
     public $product_status;
-    public $timestamp;
     public $user_id;
     public $user_address;
     public $user_address_city;

@@ -101,8 +101,8 @@ final class UserServices{
     public function create(UserModel $user): PromiseInterface {
         $query = "INSERT INTO `users` (`user_id`, `uid`, `name`, `email`, `mobile_number`, 
                     `address`, `address_lat`, `address_long`, `state`, 
-                    `profile_photo`, `device_token`, `user_app_version`, `last_login`, `created_at`) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    `profile_photo`, `device_token`, `user_app_version`, `last_login`) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         return $this->db->query($query, [
                 NULL, 
@@ -117,8 +117,7 @@ final class UserServices{
                 $user->profile_photo, 
                 $user->device_token, 
                 $user->user_app_version, 
-                $user->last_login, 
-                $user->created_at
+                $user->last_login,
             ]);
     }
 }

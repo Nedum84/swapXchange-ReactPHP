@@ -32,6 +32,14 @@ final class RoutesIndex{
         $this->routes->addGroup('/token', function (RouteCollector $r) {
             new \App\Routes\v1\TokenRoutes($r, $this->dbCon);
         });
+        //Category
+        $this->routes->addGroup('/category', function (RouteCollector $r) {
+            new \App\Routes\v1\CategoryRoutes($r, $this->dbCon);
+        });
+        //Sub Category
+        $this->routes->addGroup('/subcategory', function (RouteCollector $r) {
+            new \App\Routes\v1\SubCategoryRoutes($r, $this->dbCon);
+        });
     }
 }
 

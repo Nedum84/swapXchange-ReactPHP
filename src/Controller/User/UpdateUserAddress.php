@@ -15,7 +15,10 @@ final class UpdateUserAddress{
         $this->userServices = new UserServices($db);
     }
 
-    public function __invoke(ServerRequestInterface $request, string $user_id){
+    public function __invoke(ServerRequestInterface $request){
+        $authPayload = \App\Utils\GetAuthPayload::getPayload($request);
+        $user_id = $authPayload->user_id;
+
         $body = json_decode((string) $request->getBody(), true);
 
         $user = new \App\Models\UserModel();

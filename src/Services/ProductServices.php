@@ -12,8 +12,26 @@ use App\Database;
 final class ProductServices{
     private $db;
     private $database;
-    private const RADIUS = 2522;
-    private const ACTIVE_PRODUCT_STATUS = 1;
+    public const RADIUS = 2522;
+    public const ACTIVE_PRODUCT_STATUS = 1;
+
+    //Adding number of products on category/subcategory row results
+    public static function noOfProductQuery($user_lat, $user_long, $extra = ""){
+        $product_status = \App\Services\ProductServices::ACTIVE_PRODUCT_STATUS;
+        $radius = \App\Services\ProductServices::RADIUS;
+        return "SELECT 
+                    COUNT(
+                        (((acos(sin(('$user_lat'*pi()/180)) * 
+                        sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
+                        *  cos((`user_address_lat`*pi()/180)) * 
+                        cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
+                    ) AS distance
+
+                from product 
+                WHERE product_status = '$product_status' $extra
+                having distance < '$radius'
+        ";
+    }
 
     private function selectQuery(
                         $limit, 
@@ -81,7 +99,7 @@ final class ProductServices{
             ->then(function (QueryResult $queryResult) {
                 return $queryResult->resultRows;
             },function ($er){
-                throw new Exception($er);
+                throw new \Exception($er);
             });
         });
     }
@@ -103,7 +121,7 @@ final class ProductServices{
             ->then(function (QueryResult $queryResult) {
                 return $queryResult->resultRows;
             },function ($er){
-                throw new Exception($er);
+                throw new \Exception($er);
             });
         });
     }
@@ -124,7 +142,7 @@ final class ProductServices{
             ->then(function (QueryResult $queryResult) {
                 return $queryResult->resultRows;
             },function ($er){
-                throw new Exception($er);
+                throw new \Exception($er);
             });
         });
     }
@@ -175,7 +193,7 @@ final class ProductServices{
             ->then(function (QueryResult $queryResult) {
                 return $queryResult->resultRows;
             }, function ($er){
-                throw new Exception($er);
+                throw new \Exception($er);
             });
         });
     }
@@ -244,9 +262,9 @@ final class ProductServices{
         $query = 'INSERT INTO 
             `product` 
                 (`id`, `product_id`, `product_name`, `category`, `sub_category`, `price`, `product_description`, 
-                `product_suggestion`, `product_condition`, `product_status`, `timestamp`, `user_id`, `user_address`, 
+                `product_suggestion`, `product_condition`, `product_status`, `user_id`, `user_address`, 
                 `user_address_city`, `user_address_lat`, `user_address_long`) 
-            VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
         return $this->db->query($query, [
                 NULL, 
@@ -259,7 +277,6 @@ final class ProductServices{
                 $product->product_suggestion, 
                 $product->product_condition, 
                 $product->product_status, 
-                $product->timestamp, 
                 $product->user_id, 
                 $product->user_address, 
                 $product->user_address_city, 

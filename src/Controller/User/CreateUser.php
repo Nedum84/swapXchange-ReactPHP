@@ -34,7 +34,6 @@ final class CreateUser{
         $user->device_token         = $body['device_token'] ?? ''; 
         $user->user_app_version           = $body['user_app_version'] ?? ''; 
         $user->last_login      = time()?? $body['last_login'] ?? '0'; 
-        $user->created_at = time()?? $body['created_at'] ?? '0';
 
 
         //Check if the uuid(uid) is already registered

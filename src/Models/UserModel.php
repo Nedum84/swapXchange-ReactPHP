@@ -19,7 +19,6 @@ class UserModel{
     public $device_token;
     public $user_app_version;
     public $last_login;
-    public $created_at;
   
 }
 ?>
