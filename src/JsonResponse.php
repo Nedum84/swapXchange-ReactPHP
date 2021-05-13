@@ -7,11 +7,10 @@ use Psr\Http\Message\ResponseInterface;
 
 final class JsonResponse{
 
-    private function response(int $statusCode, $data = null){
+    private function response(int $statusCode, $data = null):Response{
         $body = $data ? json_encode($data) : null;
         return new Response($statusCode, ['Content-Type' => 'application/json'], $body);
     }
-
     public static function ok($data = null, $message=null){
         $status = 200;
         $res = [
@@ -32,6 +31,15 @@ final class JsonResponse{
         ];
         return self::response($status, $res);
         return new self(204);
+    }
+    public static function internalServerError(string $reason=null){
+        $status = 500;
+        $res = [
+            'status' => $status,
+            'success' => false,
+            'message' => $reason??'Server error'
+        ];
+        return self::response($status, $res);
     }
 
     public static function created($data = null, $message=null){
@@ -55,12 +63,12 @@ final class JsonResponse{
         return self::response($status, $res);
     }
 
-    public static function notFound(string $error){
+    public static function notFound(string $error=null){
         $status = 404;
         $res = [
             'status' => $status,
             'success' => false,
-            'message' => $error??'Not found',
+            'message' => $error??'Resource Not found',
         ];
         return self::response($status, $res);
     }

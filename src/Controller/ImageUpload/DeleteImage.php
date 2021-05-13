@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Category;
+namespace App\Controller\ImageUpload;
 
 use App\JsonResponse;
 use App\Database;
@@ -11,19 +11,17 @@ use App\Services\ImageUploadServices;
 final class DeleteImage{
     private $imageUploadServices;
 
-    public function __construct(string $dir, \React\Filesystem\Filesystem $filesystem){
-        $this->imageUploadServices = new ImageUploadServices($db, $filesystem);
+    public function __construct(string $projectRoot, \React\Filesystem\Filesystem $filesystem){
+        $this->imageUploadServices = new ImageUploadServices($projectRoot, $filesystem);
     }
 
-    public function __invoke(ServerRequestInterface $request, string $category_id){
-        //User details...
-        $user_id = \App\Utils\GetAuthPayload::getPayload($request)->user_id;
+    public function __invoke(ServerRequestInterface $request, string $image_path){
 
-        return $this->imageUploadServices->findOne($category_id, $user_id)
-            ->then(function(array $category) {
-                if(\count($category)==0)
-                    return JsonResponse::badRequest("No category found");
-                return JsonResponse::ok(["category" => $category]);
+        return $this->imageUploadServices->delete($image_path)
+            ->then(function($response) {
+                if(\gettype($response)!="array")
+                    return JsonResponse::badRequest("No response found");
+                return JsonResponse::ok("Image successfully removed");
             },function ($er){
                 return JsonResponse::badRequest($er);
         });

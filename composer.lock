@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e6868eee2b7833b43e2380d783cbbaaf",
+    "content-hash": "d1cbdead973d855164db3cd2f8ecba4e",
     "packages": [
         {
             "name": "cakephp/core",
@@ -620,6 +620,64 @@
                 "source": "https://github.com/indigophp/hash-compat/tree/master"
             },
             "time": "2015-08-22T07:03:35+00:00"
+        },
+        {
+            "name": "narrowspark/mimetypes",
+            "version": "1.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/narrowspark/mimetypes.git",
+                "reference": "990cced3a92d4ffd348838338da44d547ee0c0fd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/narrowspark/mimetypes/zipball/990cced3a92d4ffd348838338da44d547ee0c0fd",
+                "reference": "990cced3a92d4ffd348838338da44d547ee0c0fd",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2"
+            },
+            "require-dev": {
+                "ext-fileinfo": "*",
+                "ext-json": "*",
+                "mindscreen/yarnlock": "^1.0.1",
+                "narrowspark/coding-standard": "^3.0.0",
+                "phpunit/phpunit": "^8.3.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Narrowspark\\MimeType\\": "src/"
+                },
+                "exclude-from-classmap": [
+                    "tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Bannert",
+                    "email": "d.bannert@anolilab.de",
+                    "homepage": "http://www.anolilab.de",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP MIME Types Guesser and extension mapping.",
+            "keywords": [
+                "guesser",
+                "mimetype",
+                "mimetypes",
+                "narrowspark"
+            ],
+            "support": {
+                "issues": "https://github.com/narrowspark/mimetypes/issues",
+                "source": "https://github.com/narrowspark/mimetypes"
+            },
+            "time": "2020-01-06T20:43:25+00:00"
         },
         {
             "name": "nikic/fast-route",

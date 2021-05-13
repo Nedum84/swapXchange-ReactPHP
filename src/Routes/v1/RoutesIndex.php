@@ -12,12 +12,13 @@ final class RoutesIndex{
     private $routes;    
     private $dbCon;
     private $filesystem;
-    private $dir = __FILE__;
+    private $projectRoot = __FILE__;
 
-    public function __construct(RouteCollector $r, Database $dbCon, \React\Filesystem\Filesystem $filesystem){
+    public function __construct(RouteCollector $r, Database $dbCon, \React\Filesystem\Filesystem $filesystem, string $projectRoot=__DIR__){
         $this->routes = $r;
         $this->dbCon = $dbCon;
         $this->filesystem = $filesystem;
+        $this->projectRoot = $projectRoot;
 
         $this->_route();
     }
@@ -49,7 +50,7 @@ final class RoutesIndex{
         });
         //Product Chats
         $this->routes->addGroup('/image', function (RouteCollector $r) {
-            new \App\Routes\v1\ImageUploadRoutes($r, $this->dir, $this->filesystem);
+            new \App\Routes\v1\ImageUploadRoutes($r, $this->projectRoot, $this->filesystem);
         });
     }
 }

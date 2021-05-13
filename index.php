@@ -34,15 +34,18 @@ $routes = new RouteCollector(new Std(), new GroupCountBased());
 
 $routes->addGroup('/v1', function (RouteCollector $v1Routes) use ($dbCon, $routes, $filesystem) {
     //Route to v1
-    new \App\Routes\v1\RoutesIndex($v1Routes, $dbCon, $filesystem);
+    new \App\Routes\v1\RoutesIndex($v1Routes, $dbCon, $filesystem, __DIR__);
     // new \App\Routes\v1\RoutesIndex($routes, $dbCon);
 });
+// files... 
+$routes->get('/uploads/{file:.*\.\w+}', new \App\Controller\StaticFiles\StaticFilesController($filesystem, __DIR__));
 
 // Add jwt auth middleware... 
 $auth = new Guard('/v1/products', $authenticator);
 $catAuth = new Guard('/v1/category', $authenticator);
 $subCatAuth = new Guard('/v1/subcategory', $authenticator);
 $chatCatAuth = new Guard('/v1/productchats', $authenticator);
+$imgCatAuth = new Guard('/v1/image', $authenticator);
 $imgCatAuth = new Guard('/v1/image', $authenticator);
 
 // Add routes to the server
@@ -60,37 +63,6 @@ $server->on('error', function (Exception $exception) {
 echo 'Listening on ' . str_replace('tcp:', 'http:', $socket->getAddress()) . "\n";
 
 
-$payload = array(
-    "iss" => "example.org",
-    "aud" => "example.com",
-    "iat" => 1356999524,
-    "nbf" => 1357000000
-);
-$jwt =  new JwtEncoder();
-$access_token = $jwt->encode($payload);
-$refresh_token = $jwt->decode($access_token);
-
-// var_dump($refresh_token);
-// echo strtotime("2014-01-01 00:00:01");
-
-
-// $colours = ['red', 'green', 'yellow', 'blue', 'purple', 'cyan'];
-// // This event triggers every time a new connection comes in
-// $socket->on('connection', function ($conn) use ($colours) {
-//     $colour = array_pop($colours); // Only doing this as an example, you will run out of colours.
-
-//     // Event listener for incoming data
-//     $conn->on('data', function ($data, $conn) use ($colour) {
-//         // Write data back to the connection
-//         $conn->write($data);
-
-//         // Echo the data into our terminal window
-//         echo (new \Malenki\Ansi($data))->fg($colour);
-//     });
-// });
-
-// Listen on port 1337
-// $socket->listen(1337);
 
 $loop->run();
 

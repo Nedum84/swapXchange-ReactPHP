@@ -30,7 +30,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'c0fba230e0d559de40becfcd2b8c83b55829210f',
+    'reference' => 'a97d042c33e4ecbd76a6bb7ee69cc22ebfd4ba24',
     'name' => 'campuscope/campuscope',
   ),
   'versions' => 
@@ -60,7 +60,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'c0fba230e0d559de40becfcd2b8c83b55829210f',
+      'reference' => 'a97d042c33e4ecbd76a6bb7ee69cc22ebfd4ba24',
     ),
     'doctrine/inflector' => 
     array (
@@ -133,6 +133,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '43a19f42093a0cd2d11874dff9d891027fc42214',
+    ),
+    'narrowspark/mimetypes' => 
+    array (
+      'pretty_version' => '1.6.0',
+      'version' => '1.6.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '990cced3a92d4ffd348838338da44d547ee0c0fd',
     ),
     'nikic/fast-route' => 
     array (

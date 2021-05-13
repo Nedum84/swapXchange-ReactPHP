@@ -8,20 +8,20 @@ use App\Database;
 
 final class ImageUploadRoutes{
     private $routes;    
-    private $dir;
+    private $projectRoot;
     private $filesystem;
 
-    public function __construct(RouteCollector $r, string $dir, \React\Filesystem\Filesystem $filesystem){
+    public function __construct(RouteCollector $r, string $projectRoot, \React\Filesystem\Filesystem $filesystem){
         $this->routes = $r;
-        $this->dir = $dir;
+        $this->projectRoot = $projectRoot;
         $this->filesystem = $filesystem;
 
         $this->_route();
     }
 
     private function _route() {
-        $this->routes->post('', new \App\Controller\ImageUpload\UploadImage($this->dir, $this->filesystem));
-        $this->routes->delete('/{image_url}', new \App\Controller\ImageUpload\UploadImage($this->dir, $this->filesystem));
+        $this->routes->post('', new \App\Controller\ImageUpload\UploadImage($this->projectRoot, $this->filesystem));
+        $this->routes->delete('/uploads/{image_path}', new \App\Controller\ImageUpload\DeleteImage($this->projectRoot, $this->filesystem));
     }
 }
 

@@ -11,6 +11,7 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
         '972fda704d680a3a53c68e34e193cb22' => __DIR__ . '/..' . '/react/promise-timer/src/functions_include.php',
         'cea474b4340aa9fa53661e887a21a316' => __DIR__ . '/..' . '/react/promise-stream/src/functions_include.php',
         '540044e0591873ddd06a920c6c94cf8f' => __DIR__ . '/..' . '/wyrihaximus/ticking-promise/src/functions_include.php',
+        '72142d7b40a3a0b14e91825290b5ad82' => __DIR__ . '/..' . '/cakephp/core/functions.php',
         '948ad5488880985ff1c06721a4e447fe' => __DIR__ . '/..' . '/cakephp/utility/bootstrap.php',
         'ccf53a9bad6a69f605fb25914c46b5e5' => __DIR__ . '/..' . '/wyrihaximus/json-utilities/src/functions_include.php',
         '7c9b72b4e40cc7adcca6fd17b1bf4c8d' => __DIR__ . '/..' . '/indigophp/hash-compat/src/hash_equals.php',
@@ -20,7 +21,6 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
         'ebf8799635f67b5d7248946fe2154f4a' => __DIR__ . '/..' . '/ringcentral/psr7/src/functions_include.php',
         'e0925b39a86673e84a647fb972717393' => __DIR__ . '/..' . '/wyrihaximus/cpu-core-detector/src/functions_include.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        '72142d7b40a3a0b14e91825290b5ad82' => __DIR__ . '/..' . '/cakephp/core/functions.php',
         'f3b28a95ab3f0417f7cb7996f4fa734a' => __DIR__ . '/..' . '/wyrihaximus/react-child-process-pool/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
@@ -67,6 +67,10 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
             'Psr\\Http\\Message\\' => 17,
             'PhpParser\\' => 10,
         ),
+        'N' => 
+        array (
+            'Narrowspark\\MimeType\\' => 21,
+        ),
         'I' => 
         array (
             'Icecave\\Repr\\' => 13,
@@ -109,8 +113,8 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
         ),
         'WyriHaximus\\React\\' => 
         array (
-            0 => __DIR__ . '/..' . '/wyrihaximus/ticking-promise/src',
-            1 => __DIR__ . '/..' . '/wyrihaximus/react-child-process-promise/src',
+            0 => __DIR__ . '/..' . '/wyrihaximus/react-child-process-promise/src',
+            1 => __DIR__ . '/..' . '/wyrihaximus/ticking-promise/src',
         ),
         'WyriHaximus\\FileDescriptors\\' => 
         array (
@@ -122,8 +126,8 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
         ),
         'WyriHaximus\\' => 
         array (
-            0 => __DIR__ . '/..' . '/wyrihaximus/json-utilities/src',
-            1 => __DIR__ . '/..' . '/wyrihaximus/json-throwable/src',
+            0 => __DIR__ . '/..' . '/wyrihaximus/json-throwable/src',
+            1 => __DIR__ . '/..' . '/wyrihaximus/json-utilities/src',
         ),
         'Tivie\\OS\\' => 
         array (
@@ -209,6 +213,10 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
         'PhpParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
+        ),
+        'Narrowspark\\MimeType\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/narrowspark/mimetypes/src',
         ),
         'Icecave\\Repr\\' => 
         array (

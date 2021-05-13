@@ -27,7 +27,6 @@ final class CreateCategory{
         return $this->categoryServices->create($category_name, $category_icon, $user_id) 
             ->then(
                 function ($response) {
-                    echo gettype($response);
                     if(gettype($response)!=="array"){
                         return JsonResponse::badRequest($response);
                     };
