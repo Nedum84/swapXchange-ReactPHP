@@ -53,9 +53,15 @@ final class ImageUploadServices{
 
 
     public function delete(string $imgPath): PromiseInterface{
-        $uploadPath = self::UPLOADS_DIR.'/'.$imgPath;
+        if (empty($imgPath)) {
+            return \App\Utils\PromiseResponse::rejectPromise([]);
+        }elseif (strpos($imgPath, 'uploads/') !== false) {
+            $uploadPath = $imgPath;
+        }else{
+            $uploadPath = self::UPLOADS_DIR.'/'.$imgPath;
+        }
+
         $fullPath = $this->projectRoot . '/' . $uploadPath;
-        
         $file = $this->filesystem->file($fullPath);
         return $file->exists()->then(function () use ($file) {
             return $file->remove()->then(function () {

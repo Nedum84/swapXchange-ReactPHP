@@ -52,6 +52,10 @@ final class RoutesIndex{
         $this->routes->addGroup('/image', function (RouteCollector $r) {
             new \App\Routes\v1\ImageUploadRoutes($r, $this->projectRoot, $this->filesystem);
         });
+        //Product Images
+        $this->routes->addGroup('/productimage', function (RouteCollector $r) {
+            new \App\Routes\v1\ProductImageRoutes($r, $this->dbCon, $this->projectRoot, $this->filesystem);
+        });
     }
 }
 
