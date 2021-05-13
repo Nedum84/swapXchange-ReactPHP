@@ -25,24 +25,60 @@ class InstalledVersions
 private static $installed = array (
   'root' => 
   array (
-    'pretty_version' => '1.0.0+no-version-set',
-    'version' => '1.0.0.0',
+    'pretty_version' => 'dev-develop',
+    'version' => 'dev-develop',
     'aliases' => 
     array (
     ),
-    'reference' => NULL,
+    'reference' => 'c0fba230e0d559de40becfcd2b8c83b55829210f',
     'name' => 'campuscope/campuscope',
   ),
   'versions' => 
   array (
-    'campuscope/campuscope' => 
+    'cakephp/core' => 
     array (
-      'pretty_version' => '1.0.0+no-version-set',
-      'version' => '1.0.0.0',
+      'pretty_version' => '3.9.9',
+      'version' => '3.9.9.0',
       'aliases' => 
       array (
       ),
-      'reference' => NULL,
+      'reference' => 'eadccd407141ea8ef8afac5e01467110543d6484',
+    ),
+    'cakephp/utility' => 
+    array (
+      'pretty_version' => '3.9.9',
+      'version' => '3.9.9.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '51b0af31af3239f6141006bbd7cbc7b16aba40d6',
+    ),
+    'campuscope/campuscope' => 
+    array (
+      'pretty_version' => 'dev-develop',
+      'version' => 'dev-develop',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'c0fba230e0d559de40becfcd2b8c83b55829210f',
+    ),
+    'doctrine/inflector' => 
+    array (
+      'pretty_version' => '1.4.4',
+      'version' => '1.4.4.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '4bd5c1cdfcd00e9e2d8c484f79150f67e5d355d9',
+    ),
+    'doctrine/instantiator' => 
+    array (
+      'pretty_version' => '1.4.0',
+      'version' => '1.4.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'd56bf6102915de5702778fe20f2de3b2fe570b5b',
     ),
     'evenement/evenement' => 
     array (
@@ -89,6 +125,15 @@ private static $installed = array (
       ),
       'reference' => '3dad35ee43394404ae0f1926d754e7b7820da8e4',
     ),
+    'indigophp/hash-compat' => 
+    array (
+      'pretty_version' => 'v1.1.0',
+      'version' => '1.1.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '43a19f42093a0cd2d11874dff9d891027fc42214',
+    ),
     'nikic/fast-route' => 
     array (
       'pretty_version' => 'v1.3.0',
@@ -106,6 +151,15 @@ private static $installed = array (
       array (
       ),
       'reference' => 'c6d052fc58cb876152f89f532b95a8d7907e7f0e',
+    ),
+    'paragonie/random_compat' => 
+    array (
+      'pretty_version' => 'v9.99.100',
+      'version' => '9.99.100.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '996434e5492cb4c3edcb9168db6fbb1359ef965a',
     ),
     'psr/http-message' => 
     array (
@@ -159,6 +213,15 @@ private static $installed = array (
       ),
       'reference' => '4bf736a2cccec7298bdf745db77585966fc2ca7e',
     ),
+    'react/child-process' => 
+    array (
+      'pretty_version' => 'v0.6.2',
+      'version' => '0.6.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '70486012c0265264d2afa489ff32e7cdb76000d9',
+    ),
     'react/dns' => 
     array (
       'pretty_version' => 'v1.5.0',
@@ -176,6 +239,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '6d24de090cd59cfc830263cfba965be77b563c13',
+    ),
+    'react/filesystem' => 
+    array (
+      'pretty_version' => 'v0.1.2',
+      'version' => '0.1.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '766cdef9ba806367114f0c5ba36ea2a6eec8ccd2',
     ),
     'react/http' => 
     array (
@@ -284,6 +356,87 @@ private static $installed = array (
       array (
       ),
       'reference' => '360faaec4b563958b673fb52bbe94e37f14bc686',
+    ),
+    'tivie/php-os-detector' => 
+    array (
+      'pretty_version' => '1.1.0',
+      'version' => '1.1.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '9461dcd85c00e03842264f2fc8ccdc8d46867321',
+    ),
+    'wyrihaximus/cpu-core-detector' => 
+    array (
+      'pretty_version' => '1.0.2',
+      'version' => '1.0.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'fff4194540a8111c298e5e707bcfc778c4c9ddbb',
+    ),
+    'wyrihaximus/file-descriptors' => 
+    array (
+      'pretty_version' => '1.0.0',
+      'version' => '1.0.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '6b3073409b94912354cc9b6bde600797940c4edf',
+    ),
+    'wyrihaximus/json-throwable' => 
+    array (
+      'pretty_version' => '2.0.0',
+      'version' => '2.0.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8b11703f5974492f4c4e0b313836d0aed2eef01d',
+    ),
+    'wyrihaximus/json-utilities' => 
+    array (
+      'pretty_version' => '1.1.0',
+      'version' => '1.1.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'f0f5007df750f8e44c8ba8ce9ee8e701472ea4c7',
+    ),
+    'wyrihaximus/react-child-process-messenger' => 
+    array (
+      'pretty_version' => '2.10.1',
+      'version' => '2.10.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'aca3f5488ae8cda363cf6af7e3aa4ee19ae65391',
+    ),
+    'wyrihaximus/react-child-process-pool' => 
+    array (
+      'pretty_version' => '1.6.0',
+      'version' => '1.6.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'c5063e10d12894e20f17eb1aadf2437232450c08',
+    ),
+    'wyrihaximus/react-child-process-promise' => 
+    array (
+      'pretty_version' => '2.0.2',
+      'version' => '2.0.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '206fe3d5180c7b6f757e8aaa9fef687f42d43164',
+    ),
+    'wyrihaximus/ticking-promise' => 
+    array (
+      'pretty_version' => '1.6.3',
+      'version' => '1.6.3.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '4bb99024402bb7526de8880f3dab0c1f0858def5',
     ),
   ),
 );

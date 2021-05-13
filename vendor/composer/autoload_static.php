@@ -10,13 +10,37 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
         'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         '972fda704d680a3a53c68e34e193cb22' => __DIR__ . '/..' . '/react/promise-timer/src/functions_include.php',
         'cea474b4340aa9fa53661e887a21a316' => __DIR__ . '/..' . '/react/promise-stream/src/functions_include.php',
+        '540044e0591873ddd06a920c6c94cf8f' => __DIR__ . '/..' . '/wyrihaximus/ticking-promise/src/functions_include.php',
+        '948ad5488880985ff1c06721a4e447fe' => __DIR__ . '/..' . '/cakephp/utility/bootstrap.php',
+        'ccf53a9bad6a69f605fb25914c46b5e5' => __DIR__ . '/..' . '/wyrihaximus/json-utilities/src/functions_include.php',
+        '7c9b72b4e40cc7adcca6fd17b1bf4c8d' => __DIR__ . '/..' . '/indigophp/hash-compat/src/hash_equals.php',
+        '43d9263e52ab88b5668a28ee36bd4e65' => __DIR__ . '/..' . '/indigophp/hash-compat/src/hash_pbkdf2.php',
+        '7b57123961c149f9e408ff6aceaee3ee' => __DIR__ . '/..' . '/wyrihaximus/json-throwable/src/functions_include.php',
+        '2cce0c19c44d4e6b9b83d392d5dcc239' => __DIR__ . '/..' . '/wyrihaximus/react-child-process-promise/src/functions_include.php',
         'ebf8799635f67b5d7248946fe2154f4a' => __DIR__ . '/..' . '/ringcentral/psr7/src/functions_include.php',
+        'e0925b39a86673e84a647fb972717393' => __DIR__ . '/..' . '/wyrihaximus/cpu-core-detector/src/functions_include.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        '72142d7b40a3a0b14e91825290b5ad82' => __DIR__ . '/..' . '/cakephp/core/functions.php',
+        'f3b28a95ab3f0417f7cb7996f4fa734a' => __DIR__ . '/..' . '/wyrihaximus/react-child-process-pool/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
+        '5e93f83f32d7c16b062898884b9a20d8' => __DIR__ . '/..' . '/react/filesystem/src/functions_include.php',
     );
 
     public static $prefixLengthsPsr4 = array (
+        'W' => 
+        array (
+            'WyriHaximus\\React\\ChildProcess\\Pool\\' => 36,
+            'WyriHaximus\\React\\ChildProcess\\Messenger\\' => 41,
+            'WyriHaximus\\React\\' => 18,
+            'WyriHaximus\\FileDescriptors\\' => 28,
+            'WyriHaximus\\CpuCoreDetector\\' => 28,
+            'WyriHaximus\\' => 12,
+        ),
+        'T' => 
+        array (
+            'Tivie\\OS\\' => 9,
+        ),
         'R' => 
         array (
             'RingCentral\\Psr7\\' => 17,
@@ -31,8 +55,10 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
             'React\\Promise\\' => 14,
             'React\\MySQL\\' => 12,
             'React\\Http\\' => 11,
+            'React\\Filesystem\\' => 17,
             'React\\EventLoop\\' => 16,
             'React\\Dns\\' => 10,
+            'React\\ChildProcess\\' => 19,
             'React\\Cache\\' => 12,
         ),
         'P' => 
@@ -55,6 +81,17 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
             'Firebase\\JWT\\' => 13,
             'FastRoute\\' => 10,
         ),
+        'D' => 
+        array (
+            'Doctrine\\Instantiator\\' => 22,
+            'Doctrine\\Inflector\\' => 19,
+            'Doctrine\\Common\\Inflector\\' => 26,
+        ),
+        'C' => 
+        array (
+            'Cake\\Utility\\' => 13,
+            'Cake\\Core\\' => 10,
+        ),
         'A' => 
         array (
             'App\\' => 4,
@@ -62,6 +99,36 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
     );
 
     public static $prefixDirsPsr4 = array (
+        'WyriHaximus\\React\\ChildProcess\\Pool\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wyrihaximus/react-child-process-pool/src',
+        ),
+        'WyriHaximus\\React\\ChildProcess\\Messenger\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wyrihaximus/react-child-process-messenger/src',
+        ),
+        'WyriHaximus\\React\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wyrihaximus/ticking-promise/src',
+            1 => __DIR__ . '/..' . '/wyrihaximus/react-child-process-promise/src',
+        ),
+        'WyriHaximus\\FileDescriptors\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wyrihaximus/file-descriptors/src',
+        ),
+        'WyriHaximus\\CpuCoreDetector\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wyrihaximus/cpu-core-detector/src',
+        ),
+        'WyriHaximus\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wyrihaximus/json-utilities/src',
+            1 => __DIR__ . '/..' . '/wyrihaximus/json-throwable/src',
+        ),
+        'Tivie\\OS\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/tivie/php-os-detector/src',
+        ),
         'RingCentral\\Psr7\\' => 
         array (
             0 => __DIR__ . '/..' . '/ringcentral/psr7/src',
@@ -110,6 +177,10 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
         array (
             0 => __DIR__ . '/..' . '/react/http/src',
         ),
+        'React\\Filesystem\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/react/filesystem/src',
+        ),
         'React\\EventLoop\\' => 
         array (
             0 => __DIR__ . '/..' . '/react/event-loop/src',
@@ -117,6 +188,10 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
         'React\\Dns\\' => 
         array (
             0 => __DIR__ . '/..' . '/react/dns/src',
+        ),
+        'React\\ChildProcess\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/react/child-process/src',
         ),
         'React\\Cache\\' => 
         array (
@@ -154,6 +229,26 @@ class ComposerStaticInitd97611226b189cc60a21263bb9a08b5f
         'FastRoute\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/fast-route/src',
+        ),
+        'Doctrine\\Instantiator\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
+        ),
+        'Doctrine\\Inflector\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/doctrine/inflector/lib/Doctrine/Inflector',
+        ),
+        'Doctrine\\Common\\Inflector\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/doctrine/inflector/lib/Doctrine/Common/Inflector',
+        ),
+        'Cake\\Utility\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cakephp/utility',
+        ),
+        'Cake\\Core\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cakephp/core',
         ),
         'App\\' => 
         array (

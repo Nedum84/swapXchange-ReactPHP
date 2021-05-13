@@ -6,6 +6,13 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'WyriHaximus\\React\\ChildProcess\\Pool\\' => array($vendorDir . '/wyrihaximus/react-child-process-pool/src'),
+    'WyriHaximus\\React\\ChildProcess\\Messenger\\' => array($vendorDir . '/wyrihaximus/react-child-process-messenger/src'),
+    'WyriHaximus\\React\\' => array($vendorDir . '/wyrihaximus/ticking-promise/src', $vendorDir . '/wyrihaximus/react-child-process-promise/src'),
+    'WyriHaximus\\FileDescriptors\\' => array($vendorDir . '/wyrihaximus/file-descriptors/src'),
+    'WyriHaximus\\CpuCoreDetector\\' => array($vendorDir . '/wyrihaximus/cpu-core-detector/src'),
+    'WyriHaximus\\' => array($vendorDir . '/wyrihaximus/json-utilities/src', $vendorDir . '/wyrihaximus/json-throwable/src'),
+    'Tivie\\OS\\' => array($vendorDir . '/tivie/php-os-detector/src'),
     'RingCentral\\Psr7\\' => array($vendorDir . '/ringcentral/psr7/src'),
     'Recoil\\ReferenceKernel\\' => array($vendorDir . '/recoil/recoil/src'),
     'Recoil\\React\\' => array($vendorDir . '/recoil/react/src'),
@@ -18,8 +25,10 @@ return array(
     'React\\Promise\\' => array($vendorDir . '/react/promise/src'),
     'React\\MySQL\\' => array($vendorDir . '/react/mysql/src'),
     'React\\Http\\' => array($vendorDir . '/react/http/src'),
+    'React\\Filesystem\\' => array($vendorDir . '/react/filesystem/src'),
     'React\\EventLoop\\' => array($vendorDir . '/react/event-loop/src'),
     'React\\Dns\\' => array($vendorDir . '/react/dns/src'),
+    'React\\ChildProcess\\' => array($vendorDir . '/react/child-process/src'),
     'React\\Cache\\' => array($vendorDir . '/react/cache/src'),
     'Psr\\Http\\Server\\' => array($vendorDir . '/psr/http-server-handler/src', $vendorDir . '/psr/http-server-middleware/src'),
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
@@ -29,5 +38,10 @@ return array(
     'FriendsOfReact\\Http\\Middleware\\Psr15Adapter\\' => array($vendorDir . '/for/http-middleware-psr15-adapter/src'),
     'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
     'FastRoute\\' => array($vendorDir . '/nikic/fast-route/src'),
+    'Doctrine\\Instantiator\\' => array($vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator'),
+    'Doctrine\\Inflector\\' => array($vendorDir . '/doctrine/inflector/lib/Doctrine/Inflector'),
+    'Doctrine\\Common\\Inflector\\' => array($vendorDir . '/doctrine/inflector/lib/Doctrine/Common/Inflector'),
+    'Cake\\Utility\\' => array($vendorDir . '/cakephp/utility'),
+    'Cake\\Core\\' => array($vendorDir . '/cakephp/core'),
     'App\\' => array($baseDir . '/src'),
 );
