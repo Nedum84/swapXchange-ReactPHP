@@ -27,8 +27,11 @@ final class ProductRoutes{
         $this->routes->get('/search/{query}[/{filters}[/{offset}[/{limit}]]]', new \App\Controller\Products\FindBySearch($this->dbCon));
         $this->routes->get('/category/{category}[/{offset}[/{limit}]]', new \App\Controller\Products\FindByCategory($this->dbCon));
         $this->routes->get('/subcategory/{subcategory}[/{offset}[/{limit}]]', new \App\Controller\Products\FindBySubCategory($this->dbCon));
+        $this->routes->get('/me[/{offset}[/{limit}]]', new \App\Controller\Products\FindMyProducts($this->dbCon));
+        $this->routes->get('/user/{user_id}[/{filter}[/{offset}[/{limit}]]]', new \App\Controller\Products\FindUserProducts($this->dbCon));
+        $this->routes->get('/exchange/{product_id}[/{offset}[/{limit}]]', new \App\Controller\Products\FindExchangeOptions($this->dbCon));
         $this->routes->post('', new \App\Controller\Products\CreateProduct($this->dbCon));
-        $this->routes->put('/{product_id}', new \App\Controller\Products\UpdateProduct($this->dbCon));
+        $this->routes->patch('/{product_id}', new \App\Controller\Products\UpdateProduct($this->dbCon));
         $this->routes->get('/{product_id}', new \App\Controller\Products\FindOne($this->dbCon));
     }
 }

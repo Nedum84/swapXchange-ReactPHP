@@ -18,9 +18,11 @@ final class UpdateProduct{
     }
 
     public function __invoke(ServerRequestInterface $request, string $product_id){
+        $user_id = \App\Utils\GetAuthPayload::getPayload($request)->user_id;
+
         $body = json_decode((string) $request->getBody(), true);
         $product = new ProductModel();
-        // $product->product_id        = $body['product_id'] ?? ''; 
+        $product->product_id        = $product_id ?? $body['product_id'] ?? ''; 
         $product->product_name      = $body['product_name'] ?? ''; 
         $product->category          = $body['category'] ?? ''; 
         $product->sub_category      = $body['sub_category'] ?? ''; 
@@ -30,7 +32,7 @@ final class UpdateProduct{
         $product->product_condition    = $body['product_condition'] ?? ''; 
         $product->product_status    = $body['product_status'] ?? ''; 
         $product->timestamp         = $body['timestamp'] ?? ''; 
-        $product->user_id           = $body['user_id'] ?? ''; 
+        $product->user_id           = $user_id ?? $body['user_id'] ?? ''; 
         $product->user_address      = $body['user_address'] ?? ''; 
         $product->user_address_city = $body['user_address_city'] ?? ''; 
         $product->user_address_lat  = $body['user_address_lat'] ?? ''; 
@@ -38,13 +40,11 @@ final class UpdateProduct{
 
         return $this->productServices->update($product, $product_id) 
             ->then(
-                function () use ($product_id) {
-
-                    //Include product in the response data payload
-                    return $this->productServices->findByProductId($product_id)->then(
-                        function(array $product) {
-                        return JsonResponse::ok(["product" => $product]);
-                    });
+                function (array $product) {
+                    if(count($product)==0){
+                        return JsonResponse::notFound();
+                    };
+                    return JsonResponse::ok(["product" => $product]);
                 },
                 function ($error) {
                     return JsonResponse::badRequest($error->getMessage()??$error);

@@ -6,8 +6,8 @@ class ProductModel{
     private $table_name = "product";
   
     // object properties
-    public $id;
     public $product_id;
+    public $order_id;
     public $product_name;
     public $category;
     public $sub_category;

@@ -13,7 +13,31 @@ final class ProductServices{
     private $db;
     private $database;
     public const RADIUS = 2522;
-    public const ACTIVE_PRODUCT_STATUS = 1;
+    public const UNPUBLISHED_PRODUCT_STATUS     = 1;
+    public const PENDING_APPROVAL_PRODUCT_STATUS= 2;
+    public const ACTIVE_PRODUCT_STATUS          = 3;
+    public const COMPLETED_PRODUCT_STATUS       = 4;
+    public const DELETED_PRODUCT_STATUS         = 5;
+
+    private static function imgSubQuery(){
+        return "JSON_EXTRACT(
+                IFNULL(
+                    (SELECT
+                        CONCAT('[',
+                                GROUP_CONCAT(
+                                    JSON_OBJECT(
+                                        'id',id,
+                                        'product_id',product_id,
+                                        -- 'image_id',image_id,
+                                        'image_path',image_path
+                                    )
+                                ),
+                        ']')
+                        FROM image_product WHERE  image_product.product_id = product.product_id
+                    ),
+                '[]'),
+            '$') AS images";
+    }
 
     //Adding number of products on category/subcategory row results
     public static function noOfProductQuery($user_lat, $user_long, $extra = ""){
@@ -42,7 +66,8 @@ final class ProductServices{
                         $extra="", 
                         $orderBy=null){
         $radius = self::RADIUS;
-        $orderBy = $orderBy??"ORDER BY id DESC";
+        $orderBy = $orderBy??"ORDER BY product_id DESC";
+        $imgSubQuery = self::imgSubQuery();
 
         return "SELECT product.*, 
                 (((acos(sin(('$user_lat'*pi()/180)) * 
@@ -51,23 +76,7 @@ final class ProductServices{
                 cos((`user_address_lat`*pi()/180)) * 
                 cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
                 AS distance
-                ,JSON_EXTRACT(
-                        IFNULL(
-                            (SELECT
-                                CONCAT('[',
-                                        GROUP_CONCAT(
-                                            JSON_OBJECT(
-                                                'id',id,
-                                                'product_id',product_id,
-                                                'image_id',image_id,
-                                                'image_url',image_url
-                                            )
-                                        ),
-                                ']')
-                                FROM image_product WHERE  image_product.product_id = product.product_id
-                            ),
-                        '[]'),
-                    '$') AS images
+                ,$imgSubQuery
 
 
             from product 
@@ -160,14 +169,14 @@ final class ProductServices{
                         OR category IN 
                             (SELECT category_id FROM category WHERE category_name LIKE '%$searchQuery%' ) 
                         OR sub_category IN 
-                            (SELECT sub_category_id FROM sub_category WHERE sub_category_name LIKE '%$searchQuery%' ) 
+                            (SELECT sub_category_id FROM subcategory WHERE sub_category_name LIKE '%$searchQuery%' ) 
                     ";
 
             $orderBy = null;
             if(!empty($filters)){
                 switch ($filters) {
                     case 'best-match':
-                        $orderBy = "ORDER BY id DESC";
+                        $orderBy = "ORDER BY product_id DESC";
                         break;
                     case 'price-high':
                         $orderBy = "ORDER BY price DESC";
@@ -176,14 +185,14 @@ final class ProductServices{
                         $orderBy = "ORDER BY price ASC";
                         break;
                     case 'newest':
-                        $orderBy = "ORDER BY id DESC";
+                        $orderBy = "ORDER BY product_id DESC";
                         break;
                     case 'oldest':
-                        $orderBy = "ORDER BY id ASC";
+                        $orderBy = "ORDER BY product_id ASC";
                         break;
                                 
                     default:
-                        $orderBy = "ORDER BY id DESC";
+                        $orderBy = "ORDER BY product_id DESC";
                         break;
                 }
             }
@@ -198,30 +207,88 @@ final class ProductServices{
         });
     }
 
-    public function findByProductId(string $pId): PromiseInterface{
-        return $this->db->query('SELECT * FROM product WHERE product_id = ?', [$pId])
+
+    public function findExchangeOptions($product_id, $user_id, $offset, $limit): PromiseInterface{
+        return $this->findOne($product_id)
+            ->then(function ($product) use ($user_id, $product_id, $offset, $limit) {
+                if(empty($product))return [];
+
+                $userServices = new \App\Services\UserServices($this->database);
+                return $userServices->findOne($user_id)->then(function ($user) use ($product, $offset, $limit, $product_id){
+        
+                    $user               = (object)$user;
+                    $user_lat           = $user->address_lat;
+                    $user_long          = $user->address_long;
+                    $product_status     = self::ACTIVE_PRODUCT_STATUS;
+                    $product_price      = $product['price'];
+                    $product_interests  = $product['product_suggestion'];
+        
+                    $extra = "AND product_id != $product_id";//complex later with ($product_price & $product_interests)
+                    $query = $this->selectQuery($limit, $offset, $user_lat, $user_long, $product_status, $extra);
+        
+                    return $this->db->query($query)
+                    ->then(function (QueryResult $queryResult) {
+                        return $queryResult->resultRows;
+                    },function ($er){
+                        throw new \Exception($er);
+                    });
+                });
+            });
+    }
+    public function findOne($pId): PromiseInterface{
+        $imgSubQuery = self::imgSubQuery();
+        return $this->db->query("SELECT product.*, $imgSubQuery FROM product  WHERE product_id = $pId ")
             ->then(function (QueryResult $result) {
                 if (empty($result->resultRows)) {
                     return [];
                 }
                 return $result->resultRows[0];
-            });
+        });
     }
 
-    public function delete(string $id): PromiseInterface{
-        return $this->db
-            ->query('DELETE FROM product WHERE id = ?', [$id])
-            ->then(
-                function (QueryResult $result) {
-                    if ($result->affectedRows === 0) {
-                        throw new UserNotFoundError();
-                    }
-                });
+    public function findMyProducts($user_id, $offset, $limit): PromiseInterface{
+        $imgSubQuery = self::imgSubQuery();
+        $query = "SELECT product.*, $imgSubQuery 
+                    FROM product 
+                        WHERE user_id = $user_id 
+                            ORDER BY product_id DESC 
+                                LIMIT $limit OFFSET $offset ";
+
+        return $this->db->query($query)
+        ->then(function (QueryResult $queryResult) {
+            return $queryResult->resultRows;
+        },function ($er){
+            throw new \Exception($er);
+        });
     }
 
 
-    public function update(ProductModel $product , string $product_id): PromiseInterface{
-        return $this->findByProductId($product_id)
+    //--> User not me
+    public function findUserProducts($user_id, $filter, $offset, $limit): PromiseInterface{
+        if(empty($user_id)){
+            return (new \App\Utils\PromiseResponse())::rejectPromise([]);
+        }
+        $active = self::ACTIVE_PRODUCT_STATUS;
+        $imgSubQuery = self::imgSubQuery();
+        $extra = ($filter=="all")?"":"AND product_status = $active";
+
+        $query = "SELECT product.*, $imgSubQuery FROM product 
+                    WHERE user_id = $user_id 
+                            $extra
+                            ORDER BY product_id DESC 
+                                LIMIT $limit OFFSET $offset ";
+
+        return $this->db->query($query)
+        ->then(function (QueryResult $queryResult) {
+            return $queryResult->resultRows;
+        },function ($er){
+            throw new \Exception($er);
+        });
+    }
+
+
+    public function update(ProductModel $product , int $product_id): PromiseInterface{
+        return $this->findOne($product_id, $product->user_id)
             ->then(function () use ($product, $product_id) {
                 $query  = "UPDATE product SET 
                         product_name = ? , 
@@ -238,7 +305,7 @@ final class ProductServices{
                         user_address_long = ?
                         WHERE product_id = ? ";
 
-                $this->db->query($query, [
+                return $this->db->query($query, [ 
                     $product->product_name, 
                     $product->category,
                     $product->sub_category, 
@@ -253,7 +320,12 @@ final class ProductServices{
                     $product->user_address_long,
 
                     $product_id
-                ]);
+                ])->then(function () use ($product) {
+                    return $this->findOne($product->product_id, $product->user_id);
+                },
+                function (\Exception $error) {
+                    return "Error: $error";
+                });
             });
     }
 
@@ -261,28 +333,33 @@ final class ProductServices{
     public function create(ProductModel $product): PromiseInterface {
         $query = 'INSERT INTO 
             `product` 
-                (`id`, `product_id`, `product_name`, `category`, `sub_category`, `price`, `product_description`, 
+                (`product_id`, `order_id`, `product_name`, `category`, `sub_category`, `price`, `product_description`, 
                 `product_suggestion`, `product_condition`, `product_status`, `user_id`, `user_address`, 
                 `user_address_city`, `user_address_lat`, `user_address_long`) 
-            VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
         return $this->db->query($query, [
                 NULL, 
-                $product->product_id, 
-                $product->product_name, 
-                $product->category, 
-                $product->sub_category, 
-                $product->price, 
-                $product->product_description, 
-                $product->product_suggestion, 
-                $product->product_condition, 
-                $product->product_status, 
-                $product->user_id, 
-                $product->user_address, 
-                $product->user_address_city, 
-                $product->user_address_lat, 
-                $product->user_address_long
-            ]);
+                $product-> order_id, 
+                $product-> product_name, 
+                $product-> category, 
+                $product-> sub_category, 
+                $product-> price, 
+                $product-> product_description, 
+                $product-> product_suggestion, 
+                $product-> product_condition, 
+                $product-> product_status, 
+                $product-> user_id, 
+                $product-> user_address, 
+                $product-> user_address_city, 
+                $product-> user_address_lat, 
+                $product-> user_address_long
+            ])->then(function () use ($product) {
+                return $this->findOne('LAST_INSERT_ID()', $product->user_id);
+            },
+            function (\Exception $error) {
+                return "Error: $error";
+            });
 
     }
 }
