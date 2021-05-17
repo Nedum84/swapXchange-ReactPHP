@@ -25,7 +25,7 @@ final class UserRoutes{
         $this->routes->patch('/me', new \App\Controller\User\UpdateUser($this->dbCon));
         $this->routes->patch('/address', new \App\Controller\User\UpdateUserAddress($this->dbCon));
         $this->routes->get('/me', new \App\Controller\User\FindMe($this->dbCon));
-        $this->routes->get('/{user_id}', new \App\Controller\User\FindOne($this->dbCon));
+        $this->routes->get('/user/{user_id}', new \App\Controller\User\FindOne($this->dbCon));
     }
 }
 

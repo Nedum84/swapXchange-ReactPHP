@@ -17,6 +17,7 @@ class UserModel{
     public $state;
     public $profile_photo;
     public $device_token;
+    public $online_status;
     public $user_app_version;
     public $last_login;
   

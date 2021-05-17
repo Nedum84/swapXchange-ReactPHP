@@ -28,14 +28,14 @@ final class UpdateUserAddress{
         $user->state            = $body['state'] ?? ''; 
 
         return $this->userServices->updateAddress($user, $user_id)
-            ->then(
-                function () use ($user_id) {
-                    return $this->userServices->findOne($user_id)->then(
-                        function(array $user) {
-                        return JsonResponse::ok(["user" => $user]);
-                    });
+            ->then(function ($user) {
+                    if(gettype($user)!=="array"){
+                        return JsonResponse::badRequest($user);
+                    };
+                    //Include user in the response data payload
+                    return JsonResponse::ok(["user" => $user]);
                 },
-                function (Exception $error) {
+                function (\Exception $error) {
                     return JsonResponse::badRequest($error->getMessage());
                 }
             );

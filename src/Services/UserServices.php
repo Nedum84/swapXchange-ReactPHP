@@ -23,7 +23,7 @@ final class UserServices{
             });
     }
 
-    public function findOne(string $id): PromiseInterface{
+    public function findOne($id): PromiseInterface{
         return $this->db->query('SELECT * FROM users WHERE user_id = ? OR `email` = ? ', [$id, $id])
             ->then(function (QueryResult $result) {
                 if (empty($result->resultRows)) {
@@ -45,39 +45,62 @@ final class UserServices{
     }
 
 
-    public function update(UserModel $user , string $user_id): PromiseInterface{
+    public function update(UserModel $user, $user_id): PromiseInterface{
         return $this->findOne($user_id)
-            ->then(function () use ($user, $user_id) {
+            ->then(function ($oldUser) use ($user, $user_id) {
                 $query  = "UPDATE users SET 
-                        `uid` = ? , 
                         `name` = ? , 
                         email = ? , 
                         mobile_number = ? , 
                         profile_photo = ? , 
                         device_token = ? , 
+                        online_status = ? , 
                         user_app_version = ? , 
                         last_login = ?
                         WHERE user_id = ? ";
 
-                $this->db->query($query, [
-                    $user->uid, 
+                return $this->db->query($query, [
                     $user->name,
                     $user->email, 
                     $user->mobile_number, 
                     $user->profile_photo, 
                     $user->device_token, 
+                    $user->online_status ?? $oldUser["online_status"], 
                     $user->user_app_version, 
                     $user->last_login, 
 
                     $user_id
-                ]);
+                ])->then(function () use ($oldUser) {
+                    return $this->findOne($oldUser["user_id"]);
+                });
             });
     }
 
 
-    public function updateAddress(UserModel $user , string $user_id): PromiseInterface{
+
+    public function updateLastLogin(UserModel $user, $user_id): PromiseInterface{
         return $this->findOne($user_id)
-            ->then(function () use ($user, $user_id) {
+            ->then(function ($oldUser) use ($user, $user_id) {
+                $query  = "UPDATE users SET 
+                        online_status = ? , 
+                        last_login = ?
+                        WHERE user_id = ? ";
+
+                return $this->db->query($query, [
+                    $user->online_status ?? $oldUser["online_status"], 
+                    $user->last_login, 
+
+                    $user_id
+                ])->then(function () use ($oldUser) {
+                    return $this->findOne($oldUser["user_id"]);
+                });
+            });
+    }
+
+
+    public function updateAddress(UserModel $user, $user_id): PromiseInterface{
+        return $this->findOne($user_id)
+            ->then(function ($oldUser) use ($user, $user_id) {
                 $query  = "UPDATE users SET 
                         `address` = ? , 
                         address_lat = ? , 
@@ -86,19 +109,22 @@ final class UserServices{
                         WHERE user_id = ? ";
 
 
-                $this->db->query($query, [
+                return $this->db->query($query, [
                     $user->address, 
                     $user->address_lat,
                     $user->address_long, 
                     $user->state, 
 
                     $user_id
-                ]);
+                ])->then(function () use ($oldUser) {
+                    return $this->findOne($oldUser["user_id"]);
+                });
             });
     }
 
 
     public function create(UserModel $user): PromiseInterface {
+        echo "sdsdddd";
         $query = "INSERT INTO `users` (`user_id`, `uid`, `name`, `email`, `mobile_number`, 
                     `address`, `address_lat`, `address_long`, `state`, 
                     `profile_photo`, `device_token`, `user_app_version`, `last_login`) 
@@ -118,7 +144,12 @@ final class UserServices{
                 $user->device_token, 
                 $user->user_app_version, 
                 $user->last_login,
-            ]);
+            ])->then(function () use ($user) {
+                return $this->findByUid($user->uid);
+            },
+            function (\Exception $error) {
+                return "Error: $error";
+            });
     }
 }
 

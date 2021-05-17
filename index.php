@@ -41,15 +41,30 @@ $routes->addGroup('/v1', function (RouteCollector $v1Routes) use ($dbCon, $route
 $routes->get('/uploads/{file:.*\.\w+}', new \App\Controller\StaticFiles\StaticFilesController($filesystem, __DIR__));
 
 // Add jwt auth middleware... 
-$auth = new Guard('/v1/products', $authenticator);
+$productAuth = new Guard('/v1/products', $authenticator);
 $catAuth = new Guard('/v1/category', $authenticator);
 $subCatAuth = new Guard('/v1/subcategory', $authenticator);
-$chatCatAuth = new Guard('/v1/productchats', $authenticator);
+$prodctChatAuth = new Guard('/v1/productchats', $authenticator);
 $imgCatAuth = new Guard('/v1/image', $authenticator);
-$imgCatAuth = new Guard('/v1/image', $authenticator);
+$uploadAuth = new Guard('/uploads', $authenticator);
+$userAuth1 = new Guard('/v1/users/me', $authenticator);
+$userAuth2 = new Guard('/v1/users/address', $authenticator);
+$userAuth3 = new Guard('/v1/users/user', $authenticator);//--> /users/{user_id}
 
 // Add routes to the server
-$server = new React\Http\Server($loop, $auth, $catAuth, $subCatAuth, $chatCatAuth, $imgCatAuth, new \App\Router($routes));
+$server = new React\Http\Server(
+    $loop, 
+    $productAuth, 
+    $catAuth, 
+    $subCatAuth, 
+    $prodctChatAuth, 
+    $imgCatAuth,
+    $uploadAuth,
+    $userAuth1,
+    $userAuth2,
+    $userAuth3,
+    new \App\Router($routes
+));
 
 //open the socket
 $socket = new \React\Socket\Server(8088, $loop);

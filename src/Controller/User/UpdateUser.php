@@ -27,20 +27,19 @@ final class UpdateUser{
         $user->email          = $body['email'] ?? ''; 
         $user->mobile_number      = $body['mobile_number'] ?? ''; 
         $user->profile_photo    = $body['profile_photo'] ?? ''; 
-        $user->device_token         = $body['device_token'] ?? ''; 
-        $user->user_app_version           = $body['user_app_version'] ?? ''; 
-        $user->last_login      = time()?? $body['last_login'] ?? '0'; 
+        $user->device_token     = $body['device_token'] ?? ''; 
+        $user->user_app_version = $body['user_app_version'] ?? ''; 
+        $user->last_login       = date("Y-m-d H:i:s",\time()) ?? $body['last_login']; 
 
         return $this->userServices->update($user, $user_id)
-            ->then(
-                function () use ($user_id) {
+            ->then(function ($user) {
+                    if(gettype($user)!=="array"){
+                        return JsonResponse::badRequest($user);
+                    };
                     //Include user in the response data payload
-                    return $this->userServices->findOne($user_id)->then(
-                        function(array $user) {
-                        return JsonResponse::ok(["user" => $user]);
-                    });
+                    return JsonResponse::ok(["user" => $user]);
                 },
-                function (Exception $error) {
+                function (\Exception $error) {
                     return JsonResponse::badRequest($error->getMessage());
                 }
             );
