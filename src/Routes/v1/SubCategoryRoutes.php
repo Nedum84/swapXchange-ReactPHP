@@ -24,6 +24,7 @@ final class SubCategoryRoutes{
         $this->routes->post('', new \App\Controller\SubCategory\CreateSubCategory($this->dbCon));
         $this->routes->patch('/{sub_cat_id}', new \App\Controller\SubCategory\UpdateSubCategory($this->dbCon));
         $this->routes->get('/{sub_cat_id}', new \App\Controller\SubCategory\FindOne($this->dbCon));
+        $this->routes->get('/category/{cat_id}', new \App\Controller\SubCategory\FindByCategoryId($this->dbCon));
     }
 }
 

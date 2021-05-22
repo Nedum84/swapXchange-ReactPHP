@@ -38,6 +38,23 @@ final class ProductServices{
                 '[]'),
             '$') AS images";
     }
+    private static function userSubQuery(){
+        return "JSON_EXTRACT(
+                    IFNULL(
+                        (SELECT
+                        JSON_OBJECT
+                            (
+                                'user_id',user_id,
+                                'name',name,
+                                'mobile_number',mobile_number,
+                                'address',address,
+                                'profile_photo',profile_photo
+                            )
+                        FROM users WHERE  users.user_id = product.user_id
+                        ),
+                    '{}'),
+                '$') AS user";
+    }
 
     //Adding number of products on category/subcategory row results
     public static function noOfProductQuery($user_lat, $user_long, $extra = ""){
@@ -68,6 +85,7 @@ final class ProductServices{
         $radius = self::RADIUS;
         $orderBy = $orderBy??"ORDER BY product_id DESC";
         $imgSubQuery = self::imgSubQuery();
+        $userSubQuery = self::userSubQuery();
 
         return "SELECT product.*, 
                 (((acos(sin(('$user_lat'*pi()/180)) * 
@@ -77,6 +95,8 @@ final class ProductServices{
                 cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
                 AS distance
                 ,$imgSubQuery
+                ,$userSubQuery
+
 
 
             from product 
@@ -237,7 +257,8 @@ final class ProductServices{
     }
     public function findOne($pId): PromiseInterface{
         $imgSubQuery = self::imgSubQuery();
-        return $this->db->query("SELECT product.*, $imgSubQuery FROM product  WHERE product_id = $pId ")
+        $userSubQuery = self::userSubQuery();
+        return $this->db->query("SELECT product.*, $imgSubQuery, $userSubQuery FROM product  WHERE product_id = $pId ")
             ->then(function (QueryResult $result) {
                 if (empty($result->resultRows)) {
                     return [];
@@ -283,6 +304,19 @@ final class ProductServices{
             return $queryResult->resultRows;
         },function ($er){
             throw new \Exception($er);
+        });
+    }
+    //--> Get Searched suggestions
+    public function findSuggestions($searchQuery, $user_id): PromiseInterface{
+        $query ="SELECT DISTINCT product_name as item FROM product WHERE product_name LIKE '%$searchQuery%'
+                    UNION
+                SELECT DISTINCT category_name as item FROM category WHERE category_name LIKE '%$searchQuery%'
+                    UNION
+                SELECT DISTINCT sub_category_name as item FROM subcategory WHERE sub_category_name LIKE '%$searchQuery%'
+                ";
+        return $this->db->query($query)
+            ->then(function (QueryResult $result) {
+                return $result->resultRows;
         });
     }
 

@@ -24,7 +24,8 @@ final class TokenServices{
 
     public function generateToken(string $user_id, string $uid = null):PromiseInterface{
 
-        $accessExpires = strtotime("+ 10 days");
+        // $accessExpires = strtotime("+ 30 days");
+        $accessExpires = strtotime("+ 20 seconds");
         $refreshExpires = strtotime("next month");
         $accessPayload = array(
             "iss" => "swapxchange.shop",

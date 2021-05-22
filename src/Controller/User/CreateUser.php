@@ -43,8 +43,12 @@ final class CreateUser{
             //If already registered, return the user
             if(count($oldUser)!=0&&!empty($oldUser)){
                 //Update user
-                return $this->userServices->updateLastLogin($user, $oldUser["user_id"])
-                    ->then(function($user) {
+                if(empty($oldUser['name'])){
+                    $update = $this->userServices->update($user, $oldUser["user_id"]);
+                }else{
+                    $update = $this->userServices->updateLastLogin($user, $oldUser["user_id"]);
+                }
+                return $update->then(function($user) {
                         if(gettype($user)!=="array"){
                             return JsonResponse::badRequest($user);
                         };

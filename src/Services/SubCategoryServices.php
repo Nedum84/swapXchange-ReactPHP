@@ -46,6 +46,34 @@ final class SubCategoryServices{
             throw new \Exception($er);
         });
     }
+    public function findByCategoryId($user_id, $category_id): PromiseInterface{
+        $userServices = new \App\Services\UserServices($this->database);
+        return $userServices->findOne($user_id)->then(function ($user) use ($category_id){
+
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+            $extra = "AND product.sub_category = subcategory.sub_category_id";
+
+            $no_of_product_query = \App\Services\ProductServices::noOfProductQuery($user_lat, $user_long, $extra);
+            $query = "SELECT subcategory.*,
+                        -- no of products for this sub categories
+                            ($no_of_product_query) as no_of_products
+
+                        FROM subcategory
+                        WHERE subcategory.category_id = '$category_id'
+                        ORDER BY `idx` ";
+
+            return $this->db->query($query)->then(function (QueryResult $queryResult) {
+                return $queryResult->resultRows;
+            },function ($er){
+                throw new \Exception($er);
+            });
+        },function ($er){
+            throw new \Exception($er);
+        });
+    }
+
     public function findAll2($user_id): PromiseInterface{
         return $this->db->query("SELECT subcategory.*
                                 ,(SELECT COUNT(DISTINCT product.id) FROM product 

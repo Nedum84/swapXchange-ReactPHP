@@ -21,9 +21,11 @@ final class ProductRoutes{
     }
 
     private function _route() {
-        //all/offset/limit  eg all/1/21
+        //---> all/offset/limit  eg all/1/21
         $this->routes->get('/all[/{offset}[/{limit}]]', new \App\Controller\Products\FindAll($this->dbCon));
-        //search/
+        //---> search suggestions
+        $this->routes->get('/search/suggest/{query}', new \App\Controller\Products\FindSearchSuggestions($this->dbCon));
+        //---> Search
         $this->routes->get('/search/{query}[/{filters}[/{offset}[/{limit}]]]', new \App\Controller\Products\FindBySearch($this->dbCon));
         $this->routes->get('/category/{category}[/{offset}[/{limit}]]', new \App\Controller\Products\FindByCategory($this->dbCon));
         $this->routes->get('/subcategory/{subcategory}[/{offset}[/{limit}]]', new \App\Controller\Products\FindBySubCategory($this->dbCon));
