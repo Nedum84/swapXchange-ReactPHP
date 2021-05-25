@@ -23,6 +23,7 @@ final class UpdateProductChats{
         $pChat->offer_product_id  = $body['offer_product_id']; 
         $pChat->sender_id        = $body['sender_id']; 
         $pChat->receiver_id        = $body['receiver_id']; 
+        $pChat->chat_status        = $body['chat_status']; 
 
         return $this->productChatsServices->update($pChat) 
             ->then(

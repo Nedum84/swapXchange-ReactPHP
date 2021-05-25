@@ -21,8 +21,8 @@ final class FindByCategoryId{
     
         return $this->subCategoryServices->findByCategoryId($user_id, $category_id)
             ->then(function(array $subcategory) {
-                if(\count($subcategory)==0)
-                    return JsonResponse::badRequest("No Sub category found");
+                // if(\count($subcategory)==0)
+                //     return JsonResponse::badRequest("No Sub category found");
                 return JsonResponse::ok(["subcategory" => $subcategory]);
             },function ($er){
                 return JsonResponse::badRequest($er);

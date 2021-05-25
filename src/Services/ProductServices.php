@@ -53,7 +53,37 @@ final class ProductServices{
                         FROM users WHERE  users.user_id = product.user_id
                         ),
                     '{}'),
-                '$') AS user";
+                '$') AS user
+
+                -- product suggestions categories array
+                ,JSON_EXTRACT(
+                    IFNULL(
+                        (SELECT
+                            CONCAT('[',
+                                    GROUP_CONCAT(
+                                        JSON_OBJECT(
+                                            'category_id',category_id,
+                                            'category_name',category_name,
+                                            'category_icon',category_icon
+                                        )
+                                    ),
+                            ']')
+                            FROM category WHERE category.category_id IN 
+                                (
+                                    SELECT category_id FROM category WHERE  
+                                        category_id = SUBSTRING_INDEX(product.product_suggestion, ',',1) -- First one
+                                        OR category_id = SUBSTRING_INDEX(product.product_suggestion, ',',-1) -- Last one
+                                        OR category_id = SUBSTRING_INDEX(SUBSTRING_INDEX(product.product_suggestion, ',',2), ',',-1) -- Second one
+                                        OR category_id = SUBSTRING_INDEX(SUBSTRING_INDEX(product.product_suggestion, ',',3), ',',-1) -- Third one
+                                        OR category_id = SUBSTRING_INDEX(SUBSTRING_INDEX(product.product_suggestion, ',',4), ',',-1) -- 4th
+                                        OR category_id = SUBSTRING_INDEX(SUBSTRING_INDEX(product.product_suggestion, ',',5), ',',-1) -- 5th
+                                        OR category_id = SUBSTRING_INDEX(SUBSTRING_INDEX(product.product_suggestion, ',',6), ',',-1) -- 6th
+                                        --category_id = SUBSTRING_INDEX(product.product_suggestion, ',',-1) 
+                                        --category_id = SUBSTRING_INDEX(product.product_suggestion, ',',2)  
+                                )
+                        ),
+                    '[]'),
+                '$') AS suggestions";
     }
 
     //Adding number of products on category/subcategory row results
@@ -154,10 +184,10 @@ final class ProductServices{
             });
         });
     }
-    public function findBySubCategory($user_id, $subcategory, $offset, $limit): PromiseInterface{
+    public function findBySubCategory($user_id, $subcategory, $offset, $limit, $filters): PromiseInterface{
         $userServices = new \App\Services\UserServices($this->database);
         
-        return $userServices->findOne($user_id)->then(function ($user) use ($offset, $limit, $subcategory){
+        return $userServices->findOne($user_id)->then(function ($user) use ($offset, $limit, $subcategory, $filters){
 
             $user = (object)$user;
             $user_lat = $user->address_lat;
@@ -165,7 +195,32 @@ final class ProductServices{
             $product_status = self::ACTIVE_PRODUCT_STATUS;
 
             $extra = "AND sub_category = $subcategory";
-            $query = $this->selectQuery($limit, $offset, $user_lat, $user_long, $product_status, $extra);
+
+            $orderBy = null;
+            if(!empty($filters)){
+                switch ($filters) {
+                    case 'best-match':
+                        $orderBy = "ORDER BY product_id DESC";
+                        break;
+                    case 'price-high':
+                        $orderBy = "ORDER BY price DESC";
+                        break;
+                    case 'price-low':
+                        $orderBy = "ORDER BY price ASC";
+                        break;
+                    case 'newest':
+                        $orderBy = "ORDER BY product_id DESC";
+                        break;
+                    case 'oldest':
+                        $orderBy = "ORDER BY product_id ASC";
+                        break;
+                                
+                    default:
+                        $orderBy = "ORDER BY product_id DESC";
+                        break;
+                }
+            }
+            $query = $this->selectQuery($limit, $offset, $user_lat, $user_long, $product_status, $extra, $orderBy);
 
             return $this->db->query($query)
             ->then(function (QueryResult $queryResult) {
@@ -184,6 +239,7 @@ final class ProductServices{
             $user_lat = $user->address_lat;
             $user_long = $user->address_long;
             $product_status = self::ACTIVE_PRODUCT_STATUS;
+            $searchQuery = ($searchQuery!="none")?$searchQuery:"";
 
             $extra = "AND product_name LIKE '%$searchQuery%' 
                         OR category IN 

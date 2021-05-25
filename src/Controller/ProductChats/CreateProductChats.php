@@ -24,9 +24,9 @@ final class CreateProductChats{
         $body = json_decode((string) $request->getBody(), true);
         $pChat = new \App\Models\ProductChatsModel();
         $pChat->product_id        = $body['product_id']; 
-        $pChat->offer_product_id  = $body['offer_product_id']??''; 
+        $pChat->offer_product_id  = $body['offer_product_id']??'0'; 
         $pChat->sender_id        = $body['sender_id']??$user_id; 
-        $pChat->receiver_id        = $body['receiver_id']??0; 
+        $pChat->receiver_id        = $body['receiver_id']??'0'; 
 
         return $this->productChatsServices->create($pChat) 
             ->then(
