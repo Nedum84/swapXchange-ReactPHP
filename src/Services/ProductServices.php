@@ -29,7 +29,8 @@ final class ProductServices{
                                         'id',id,
                                         'product_id',product_id,
                                         -- 'image_id',image_id,
-                                        'image_path',image_path
+                                        'image_path',image_path,
+                                        'idx',idx
                                     )
                                 ),
                         ']')
@@ -347,9 +348,10 @@ final class ProductServices{
         }
         $active = self::ACTIVE_PRODUCT_STATUS;
         $imgSubQuery = self::imgSubQuery();
-        $extra = ($filter=="all")?"":"AND product_status = $active";
+        $userSubQuery = self::userSubQuery();
+        $extra = ($filter=="all")?"":"AND product_status = $filter";
 
-        $query = "SELECT product.*, $imgSubQuery FROM product 
+        $query = "SELECT product.*, $imgSubQuery, $userSubQuery FROM product 
                     WHERE user_id = $user_id 
                             $extra
                             ORDER BY product_id DESC 

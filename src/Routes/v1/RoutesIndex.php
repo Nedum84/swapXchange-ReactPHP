@@ -56,6 +56,10 @@ final class RoutesIndex{
         $this->routes->addGroup('/productimage', function (RouteCollector $r) {
             new \App\Routes\v1\ProductImageRoutes($r, $this->dbCon, $this->projectRoot, $this->filesystem);
         });
+        //Agora Call SDK
+        $this->routes->addGroup('/agora', function (RouteCollector $r) {
+            new \App\Routes\v1\AgoraTokenRoutes($r, $this->dbCon);
+        });
     }
 }
 

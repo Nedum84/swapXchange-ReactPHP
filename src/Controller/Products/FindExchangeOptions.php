@@ -23,7 +23,7 @@ final class FindExchangeOptions{
                 if(count($product)==0){
                     return JsonResponse::notFound();
                 };
-                return JsonResponse::ok(["product" => $product]);
+                return JsonResponse::ok(["products" => $product]);
             },function ($er){
                 return JsonResponse::badRequest($er);
         });

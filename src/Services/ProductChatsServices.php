@@ -96,23 +96,39 @@ final class ProductChatsServices{
         if(empty($productChatsModel->product_id)){
             return $promiseResponse::rejectPromise("No product ID found");
         }
-        
-        $query  = "INSERT INTO `product_chats` 
-                        (`id`, `product_id`, `offer_product_id`, `sender_id`, `receiver_id`) 
-                    VALUES (?, ?, ?, ?, ?)";
 
-        return $this->db->query($query,[
-            NULL, 
-            $productChatsModel->product_id, 
-            $productChatsModel->offer_product_id, 
-            $productChatsModel->sender_id, 
-            $productChatsModel->receiver_id
-        ])->then(function () {
-            return $this->findById('LAST_INSERT_ID()');
-        },
-        function (\Exception $error) {
-            return "Error: $error";
-        });
+        //--> Check if I have already established connection with this user's product
+        return $this->db->query(
+            "SELECT * FROM product_chats WHERE product_id = ? AND sender_id = ? ",
+        [
+            $productChatsModel->product_id,
+            $productChatsModel->sender_id,
+        ]
+        )
+        ->then(function (QueryResult $result) use ($productChatsModel){
+            if (empty($result->resultRows)) {
+                //--> INSERT
+                $insertQuery  = "INSERT INTO `product_chats` (`id`, `product_id`, `offer_product_id`, `sender_id`, `receiver_id`) 
+                VALUES (?, ?, ?, ?, ?)";
+                return $this->db->query($insertQuery,[
+                    NULL, 
+                    $productChatsModel->product_id, 
+                    $productChatsModel->offer_product_id, 
+                    $productChatsModel->sender_id, 
+                    $productChatsModel->receiver_id
+                ])->then(function () {
+                    return $this->findById('LAST_INSERT_ID()');
+                },
+                function (\Exception $error) {
+                    return "Error: $error";
+                });
+            }else{
+                $productChatsModel->id = $result->resultRows[0]["id"];
+                //UPDATE
+                return $this->update($productChatsModel);
+            }
+        });;
+        
     }
 }
 
