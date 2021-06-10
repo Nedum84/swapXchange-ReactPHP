@@ -24,14 +24,19 @@ final class UploadImage{
 
 
         return new \React\Promise\Promise(function ($resolve) use ($body) {
+            $bytes = 0;
             $requestBody='';
-            $body->on('data', function ($chunk) use (&$requestBody) {
+            $body->on('data', function ($chunk) use (&$bytes, &$requestBody) {
                 $requestBody .= $chunk;
+                $bytes += \count($chunk);
             });
-            $body->on('close', function () use ($resolve,&$requestBody) {
+            $body->on('close', function () use (&$bytes, $resolve,&$requestBody) {
+
                 $body               = json_decode($requestBody, true);
                 $image_file         = $body['image_file']??""; 
                 $file_name          = $body['file_name']??"swapxchange.jpg";
+
+                \var_dump($image_file);
 
                 $resolve(
                     $this->imageUploadServices->uploadFile($image_file, $file_name) 
@@ -48,6 +53,11 @@ final class UploadImage{
                     )
                 );
 
+                $resolve(new \React\Http\Message\Response(
+                    200,
+                    [],
+                    "Received $bytes bytes\n"
+                ));
             });
         });
     }

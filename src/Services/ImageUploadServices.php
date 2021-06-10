@@ -19,15 +19,14 @@ final class ImageUploadServices{
         $this->filesystem = $filesystem;
     }
 
-    public function uploadFile(string $base64_image_file, string $file_name): PromiseInterface{
+    public function uploadFile($base64_image_file, string $file_name): PromiseInterface{
         $uploadPath = $this->makeFilePath($file_name);
         $fullPath = $this->projectRoot . '/' . $uploadPath;
 
 		if(empty($base64_image_file)){
             return (new \App\Utils\PromiseResponse())::rejectPromise("No image selected");
         }
-        $image_file = base64_decode($base64_image_file);
-        $image_file = $base64_image_file;
+        $image_file = \base64_decode($base64_image_file);
 
         //Upload to the server asynchronously
         $file = $this->filesystem->file($fullPath);

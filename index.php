@@ -10,6 +10,7 @@ use React\MySQL\Factory;
 use App\JWTAuth\JwtAuthenticator;
 use App\JWTAuth\JwtEncoder;
 use App\JWTAuth\Guard;
+use App\Utils\JsonRequestDecoder;
 
 
 require __DIR__ . '/vendor/autoload.php';
@@ -45,8 +46,8 @@ $productAuth = new Guard('/v1/products', $authenticator);
 $catAuth = new Guard('/v1/category', $authenticator);
 $subCatAuth = new Guard('/v1/subcategory', $authenticator);
 $prodctChatAuth = new Guard('/v1/productchats', $authenticator);
-$imgCatAuth = new Guard('/v1/image', $authenticator);
-$uploadAuth = new Guard('/uploads', $authenticator);
+$imgUploadAuth = new Guard('/v1/image', $authenticator);//Uploading Images
+$uploadAuth = new Guard('/uploads', $authenticator);//View Files(Or Images)
 $userAuth1 = new Guard('/v1/users/me', $authenticator);
 $userAuth2 = new Guard('/v1/users/address', $authenticator);
 $userAuth3 = new Guard('/v1/users/user', $authenticator);//--> /users/{user_id}
@@ -54,17 +55,20 @@ $userAuth3 = new Guard('/v1/users/user', $authenticator);//--> /users/{user_id}
 // Add routes to the server
 $server = new React\Http\Server(
     $loop, 
+    // new JsonRequestDecoder(),
+    // new \React\Http\Middleware\RequestBodyBufferMiddleware(20 * 1024 * 1024), // 20 MiB per request
+    new \React\Http\Middleware\StreamingRequestMiddleware(),//To use stream data chunk
     $productAuth, 
     $catAuth, 
     $subCatAuth, 
     $prodctChatAuth, 
-    $imgCatAuth,
+    // $imgUploadAuth,
     $uploadAuth,
     $userAuth1,
     $userAuth2,
     $userAuth3,
-    new \App\Router($routes
-));
+    new \App\Router($routes)
+);
 
 //open the socket
 $socket = new \React\Socket\Server(8088, $loop);

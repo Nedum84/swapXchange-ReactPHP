@@ -1,1 +1,0 @@
-We open a file via open() method and provide to flags: c to create a file if it doesn’t exist and w to open this file in a writable mode. Then when a file is opened in the onFulfilled handler we get access to the stream which represents our file. In this handler, we can start writing to this stream.
