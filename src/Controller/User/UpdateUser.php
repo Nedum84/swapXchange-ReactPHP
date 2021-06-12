@@ -16,32 +16,44 @@ final class UpdateUser{
     }
 
     public function __invoke(ServerRequestInterface $request){
-        $authPayload = \App\Utils\GetAuthPayload::getPayload($request);
-        $user_id = $authPayload->user_id;
+        // $body = json_decode((string) $request->getBody(), true);
+        $body = $request->getBody();
+
+        return new \React\Promise\Promise(function ($resolve) use ($body, $request) {
+            $requestBody='';
+            $body->on('data', function ($chunk) use (&$requestBody) {
+                $requestBody .= $chunk;
+            });
+            $body->on('close', function () use ($resolve,&$requestBody, $request) {
+                $body               = json_decode($requestBody, true);
+                $authPayload = \App\Utils\GetAuthPayload::getPayload($request);
+                $user_id = $authPayload->user_id;
         
-        $body = json_decode((string) $request->getBody(), true);
+                $user = new \App\Models\UserModel();
+                $user->uid        = $body['uid'] ?? ''; 
+                $user->name      = $body['name'] ?? ''; 
+                $user->email          = $body['email'] ?? ''; 
+                $user->mobile_number      = $body['mobile_number'] ?? ''; 
+                $user->profile_photo    = $body['profile_photo'] ?? ''; 
+                $user->device_token     = $body['device_token'] ?? ''; 
+                $user->user_app_version = $body['user_app_version'] ?? ''; 
+                $user->last_login       = date("Y-m-d H:i:s",\time()) ?? $body['last_login']; 
 
-        $user = new \App\Models\UserModel();
-        $user->uid        = $body['uid'] ?? ''; 
-        $user->name      = $body['name'] ?? ''; 
-        $user->email          = $body['email'] ?? ''; 
-        $user->mobile_number      = $body['mobile_number'] ?? ''; 
-        $user->profile_photo    = $body['profile_photo'] ?? ''; 
-        $user->device_token     = $body['device_token'] ?? ''; 
-        $user->user_app_version = $body['user_app_version'] ?? ''; 
-        $user->last_login       = date("Y-m-d H:i:s",\time()) ?? $body['last_login']; 
-
-        return $this->userServices->update($user, $user_id)
-            ->then(function ($user) {
-                    if(gettype($user)!=="array"){
-                        return JsonResponse::badRequest($user);
-                    };
-                    //Include user in the response data payload
-                    return JsonResponse::ok(["user" => $user]);
-                },
-                function (\Exception $error) {
-                    return JsonResponse::badRequest($error->getMessage());
-                }
-            );
+                $resolve(
+                    $this->userServices->update($user, $user_id)
+                    ->then(function ($user) {
+                            if(gettype($user)!=="array"){
+                                return JsonResponse::badRequest($user);
+                            };
+                            //Include user in the response data payload
+                            return JsonResponse::ok(["user" => $user]);
+                        },
+                        function (\Exception $error) {
+                            return JsonResponse::badRequest($error->getMessage());
+                        }
+                    )
+                );
+            });
+        });
     }
 }

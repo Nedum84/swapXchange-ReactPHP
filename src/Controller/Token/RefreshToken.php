@@ -17,22 +17,31 @@ final class RefreshToken{
     }
 
     public function __invoke(ServerRequestInterface $request){
-        $body = json_decode((string) $request->getBody(), true);
-        $refresh_token    = $body['refresh_token']; 
+        // $body = json_decode((string) $request->getBody(), true);
+        $body = $request->getBody();
 
-        if(empty($refresh_token)){
-            return JsonResponse::unauthorized();
-        }
-        //Fetch token...
-        return $this->tokenServices->refreshToken($refresh_token)->then(
-            function( $tokens) {
-                if(empty($tokens)||count($tokens)==0)
-                    return JsonResponse::unauthorized('Invalid Refresh Token');
-            return JsonResponse::ok(["tokens" => $tokens]);
-        },
-        function (\Exception $error) {
-            return JsonResponse::badRequest($error->getMessage());
-        }); 
+        return new \React\Promise\Promise(function ($resolve) use ($body) {
+            $requestBody='';
+            $body->on('data', function ($chunk) use (&$requestBody) {
+                $requestBody .= $chunk;
+            });
+            $body->on('close', function () use ($resolve,&$requestBody) {
+                $body               = json_decode($requestBody, true);
+                $refresh_token    = $body['refresh_token']; 
 
+                $resolve(
+                    //Fetch token...
+                    $this->tokenServices->refreshToken($refresh_token)->then(
+                        function( $tokens) {
+                            if(empty($tokens)||count($tokens)==0)
+                                return JsonResponse::unauthorized('Invalid Refresh Token');
+                        return JsonResponse::ok(["tokens" => $tokens]);
+                    },
+                    function (\Exception $error) {
+                        return JsonResponse::badRequest($error->getMessage());
+                    })
+                );
+            });
+        });
     }
 }

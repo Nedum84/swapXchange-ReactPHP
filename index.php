@@ -51,13 +51,15 @@ $uploadAuth = new Guard('/uploads', $authenticator);//View Files(Or Images)
 $userAuth1 = new Guard('/v1/users/me', $authenticator);
 $userAuth2 = new Guard('/v1/users/address', $authenticator);
 $userAuth3 = new Guard('/v1/users/user', $authenticator);//--> /users/{user_id}
+$coinsAuth = new Guard('/v1/coins', $authenticator);
 
 // Add routes to the server
 $server = new React\Http\Server(
     $loop, 
-    // new JsonRequestDecoder(),
+    new JsonRequestDecoder(),
     // new \React\Http\Middleware\RequestBodyBufferMiddleware(20 * 1024 * 1024), // 20 MiB per request
     new \React\Http\Middleware\StreamingRequestMiddleware(),//To use stream data chunk
+    // new \React\Http\Middleware\RequestBodyParserMiddleware(),
     $productAuth, 
     $catAuth, 
     $subCatAuth, 
@@ -67,8 +69,10 @@ $server = new React\Http\Server(
     $userAuth1,
     $userAuth2,
     $userAuth3,
+    $coinsAuth,
     new \App\Router($routes)
 );
+
 
 //open the socket
 $socket = new \React\Socket\Server(8088, $loop);

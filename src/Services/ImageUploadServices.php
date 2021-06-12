@@ -19,7 +19,7 @@ final class ImageUploadServices{
         $this->filesystem = $filesystem;
     }
 
-    public function uploadFile($base64_image_file, string $file_name): PromiseInterface{
+    public function uploadFile($base64_image_file, string $file_name, string $host): PromiseInterface{
         $uploadPath = $this->makeFilePath($file_name);
         $fullPath = $this->projectRoot . '/' . $uploadPath;
 
@@ -31,11 +31,11 @@ final class ImageUploadServices{
         //Upload to the server asynchronously
         $file = $this->filesystem->file($fullPath);
         return $file->putContents((string)$image_file)
-            ->then(function () use ($uploadPath, $file) {
+            ->then(function () use ($uploadPath, $file, $host) {
                 //Get Image Stats
-                return $file->stat()->then(function ($stat) use ($uploadPath) {
+                return $file->stat()->then(function ($stat) use ($uploadPath, $host) {
                     return [
-                        "image_path" => $uploadPath,
+                        "image_path" => $host.$uploadPath,
                         "image_size_byte"=>$stat["size"]
                     ];
                 },

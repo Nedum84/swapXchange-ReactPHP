@@ -18,22 +18,37 @@ final class CreateProductImage{
     }
 
     public function __invoke(ServerRequestInterface $request){
-        $body = json_decode((string) $request->getBody(), true);
-        $product_id           = $body['product_id']; 
-        $image_path           = $body['image_path']; 
-        $idx                  = $body['idx']??"0"; 
+        // $body = json_decode((string) $request->getBody(), true);
+        $body = $request->getBody();
 
-        return $this->productImageServices->create($product_id, $image_path, $idx) 
-            ->then(
-                function (\App\Models\ServiceResponse $response) {
-                    if($response->success){
-                        return JsonResponse::created(["image_product" => $response->data]);
-                    };
-                    return JsonResponse::badRequest($response->data);
-                },
-                function ($error) {
-                    return JsonResponse::badRequest($error->getMessage()??$error);
-                }
-            );
+        return new \React\Promise\Promise(function ($resolve) use ($body) {
+            $requestBody='';
+            $body->on('data', function ($chunk) use (&$requestBody) {
+                $requestBody .= $chunk;
+            });
+            
+            $body->on('close', function () use ($resolve,&$requestBody) {
+                $body               = json_decode($requestBody, true);
+                $product_id           = $body['product_id']; 
+                $image_path           = $body['image_path']; 
+                $idx                  = $body['idx']??0; 
+                $pImgId                  = $body['id']??0; 
+
+                $resolve(
+                    $this->productImageServices->create($product_id, $image_path, $idx, $pImgId) 
+                    ->then(
+                        function (\App\Models\ServiceResponse $response) {
+                            if($response->success){
+                                return JsonResponse::created(["image_product" => $response->data]);
+                            };
+                            return JsonResponse::badRequest($response->data);
+                        },
+                        function ($error) {
+                            return JsonResponse::badRequest($error->getMessage()??$error);
+                        }
+                    )
+                );
+            });
+        });
     }
 }

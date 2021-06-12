@@ -101,28 +101,39 @@ final class ProductImageServices{
     }
 
 
-    public function create(?string $product_id, ?string $image_path, $idx): PromiseInterface {
-
+    public function create(?string $product_id, ?string $image_path, $idx, $pImgId=0): PromiseInterface {
         $promiseResponse = new \App\Utils\PromiseResponse();
         if(empty($product_id)){
             return $promiseResponse::rejectPromise(new ServiceResponse(false, "No product ID found"));
         }else if(empty($image_path)){
             return $promiseResponse::rejectPromise(new ServiceResponse(false, "Image upload path not found"));
         }
-        
-        $query  = "INSERT INTO `image_product` (`id`, `product_id`, `image_path`, `idx`) 
-                VALUES (?, ?, ?, ?)";
 
-        return $this->db->query($query,[
-            NULL,
-            $product_id,
-            $image_path,
-            $idx,
-        ])->then(function () use ($user_id) {
-            return $this->findOne('LAST_INSERT_ID()');
-        },
-        function (\Exception $error) {
-            return new ServiceResponse(false, "Error: $error");
+        //Check if already added and update else insert
+        return $this->findOne($pImgId)
+            ->then(function ($oldData) use ($pImgId, $product_id,$image_path, $idx) {
+                if(empty($oldData->data)){
+                    $query  = "INSERT INTO `image_product` (`id`, `product_id`, `image_path`, `idx`) 
+                            VALUES (?, ?, ?, ?)";
+    
+                    return $this->db->query($query,[
+                        NULL,
+                        $product_id,
+                        $image_path,
+                        $idx,
+                    ])->then(function () use ($user_id) {
+                        return $this->findOne('LAST_INSERT_ID()');
+                    },
+                    function (\Exception $error) {
+                        return new ServiceResponse(false, "Error: $error");
+                    });
+                }
+                else{
+                    return $this->update($pImgId, $product_id, $image_path, $idx);
+                }
+            },
+            function (\Exception $error) {
+                return new ServiceResponse(false, "Product image ID not found. Error: $error");
         });
     }
 }

@@ -60,6 +60,10 @@ final class RoutesIndex{
         $this->routes->addGroup('/agora', function (RouteCollector $r) {
             new \App\Routes\v1\AgoraTokenRoutes($r, $this->dbCon);
         });
+        //Coins and Credit
+        $this->routes->addGroup('/coins', function (RouteCollector $r) {
+            new \App\Routes\v1\CoinsRoutes($r, $this->dbCon);
+        });
     }
 }
 

@@ -108,7 +108,6 @@ final class UserServices{
                         `state` = ? 
                         WHERE user_id = ? ";
 
-
                 return $this->db->query($query, [
                     $user->address, 
                     $user->address_lat,
@@ -124,7 +123,6 @@ final class UserServices{
 
 
     public function create(UserModel $user): PromiseInterface {
-        echo "sdsdddd";
         $query = "INSERT INTO `users` (`user_id`, `uid`, `name`, `email`, `mobile_number`, 
                     `address`, `address_lat`, `address_long`, `state`, 
                     `profile_photo`, `device_token`, `user_app_version`, `last_login`) 
