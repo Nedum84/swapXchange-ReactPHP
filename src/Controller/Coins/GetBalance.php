@@ -15,7 +15,7 @@ final class GetBalance{
         $this->coinsServices = new CoinsServices($db);
     }
 
-    public function __invoke(ServerRequestInterface $request, string $category_id){
+    public function __invoke(ServerRequestInterface $request){
         //User details...
         $user_id = \App\Utils\GetAuthPayload::getPayload($request)->user_id;
 

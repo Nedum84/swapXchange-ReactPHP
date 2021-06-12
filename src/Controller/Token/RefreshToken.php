@@ -25,7 +25,7 @@ final class RefreshToken{
             $body->on('data', function ($chunk) use (&$requestBody) {
                 $requestBody .= $chunk;
             });
-            $body->on('close', function () use ($resolve,&$requestBody) {
+            $body->on('close', function () use ($resolve, &$requestBody) {
                 $body               = json_decode($requestBody, true);
                 $refresh_token    = $body['refresh_token']; 
 

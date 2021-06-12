@@ -21,7 +21,8 @@ final class CoinsRoutes{
 
     private function _route() {
         $this->routes->post('', new \App\Controller\Coins\CreateCoins($this->dbCon));
-        $this->routes->get('', new \App\Controller\Coins\GetBalance($this->dbCon));
+        $this->routes->post('/{user_id}', new \App\Controller\Coins\CreateCoinsForUser($this->dbCon));
+        $this->routes->get('/me', new \App\Controller\Coins\GetBalance($this->dbCon));
         $this->routes->get('/{user_id}', new \App\Controller\Coins\FindAllByUserId($this->dbCon));
     }
 }

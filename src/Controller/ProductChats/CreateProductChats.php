@@ -18,28 +18,40 @@ final class CreateProductChats{
     }
 
     public function __invoke(ServerRequestInterface $request){
-        //User details...
-        $user_id = \App\Utils\GetAuthPayload::getPayload($request)->user_id;
-        
-        $body = json_decode((string) $request->getBody(), true);
-        $pChat = new \App\Models\ProductChatsModel();
-        $pChat->product_id        = $body['product_id']; 
-        $pChat->offer_product_id  = $body['offer_product_id']??'0'; 
-        $pChat->sender_id        = $body['sender_id']??$user_id; 
-        $pChat->receiver_id        = $body['receiver_id']??'0'; 
+        $body = $request->getBody();
 
-        return $this->productChatsServices->create($pChat) 
-            ->then(
-                function ($response) {
-                    echo gettype($response);
-                    if(gettype($response)!=="array"){
-                        return JsonResponse::badRequest($response);
-                    };
-                    return JsonResponse::created(["product_chat" => $response]);
-                },
-                function ($error) {
-                    return JsonResponse::badRequest($error->getMessage()??$error);
-                }
-            );
+        return new \React\Promise\Promise(function ($resolve) use ($body, $request) {
+            $requestBody='';
+            $body->on('data', function ($chunk) use (&$requestBody) {
+                $requestBody .= $chunk;
+            });
+            $body->on('close', function () use ($resolve, &$requestBody, $request) {
+                $body               = json_decode($requestBody, true);
+                //User details...
+                $user_id = \App\Utils\GetAuthPayload::getPayload($request)->user_id;
+                
+                $pChat = new \App\Models\ProductChatsModel();
+                $pChat->product_id        = $body['product_id']; 
+                $pChat->offer_product_id  = $body['offer_product_id']??'0'; 
+                $pChat->sender_id        = $body['sender_id']??$user_id; 
+                $pChat->receiver_id        = $body['receiver_id']??'0'; 
+
+                $resolve(
+                    $this->productChatsServices->create($pChat) 
+                       ->then(
+                           function ($response) {
+                               echo gettype($response);
+                               if(gettype($response)!=="array"){
+                                   return JsonResponse::badRequest($response);
+                               };
+                               return JsonResponse::created(["product_chat" => $response]);
+                           },
+                           function ($error) {
+                               return JsonResponse::badRequest($error->getMessage()??$error);
+                           }
+                       )
+                );
+            });
+        });
     }
 }

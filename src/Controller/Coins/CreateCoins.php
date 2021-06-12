@@ -41,7 +41,7 @@ final class CreateCoins{
                                if(gettype($response)!=="array"){
                                    return JsonResponse::badRequest($response);
                                };
-                               return JsonResponse::created(["coins" => $response]);
+                               return JsonResponse::created($response);
                            },
                            function ($error) {
                                return JsonResponse::badRequest($error->getMessage()??$error);

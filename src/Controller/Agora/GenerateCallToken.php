@@ -18,23 +18,36 @@ final class GenerateCallToken{
     }
 
     public function __invoke(ServerRequestInterface $request){
-        $body = json_decode((string) $request->getBody(), true);
-        $uid            = $body['uid'] ?? '';
-        $channel_name   = $body['channel_name'] ?? '';
-        //User details...
-        $user_id = \App\Utils\GetAuthPayload::getPayload($request)->user_id;
+        // $body = json_decode((string) $request->getBody(), true);
+        $body = $request->getBody();
 
-        return $this->agoraTokenServices->generateAgoraToken($user_id, $uid, $channel_name) 
-            ->then(
-                function ($response) {
-                    if(gettype($response)!=="array"){
-                        return JsonResponse::badRequest($response);
-                    };
-                    return JsonResponse::ok(["token" => $response]);
-                },
-                function ($error) {
-                    return JsonResponse::badRequest($error->getMessage()??$error);
-                }
-            );
+        return new \React\Promise\Promise(function ($resolve) use ($body, $request) {
+            $requestBody='';
+            $body->on('data', function ($chunk) use (&$requestBody) {
+                $requestBody .= $chunk;
+            });
+            $body->on('close', function () use ($resolve, &$requestBody, $request) {
+                $body               = json_decode($requestBody, true);
+                $uid            = $body['uid'] ?? '';
+                $channel_name   = $body['channel_name'] ?? '';
+                //User details...
+                $user_id = \App\Utils\GetAuthPayload::getPayload($request)->user_id;
+
+                $resolve(
+                    $this->agoraTokenServices->generateAgoraToken($user_id, $uid, $channel_name) 
+                       ->then(
+                           function ($response) {
+                               if(gettype($response)!=="array"){
+                                   return JsonResponse::badRequest($response);
+                               };
+                               return JsonResponse::ok(["token" => $response]);
+                           },
+                           function ($error) {
+                               return JsonResponse::badRequest($error->getMessage()??$error);
+                           }
+                    )
+                );
+            });
+        });
     }
 }

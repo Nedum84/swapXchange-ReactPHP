@@ -19,14 +19,12 @@ final class CoinsServices{
     public function findAllByUserId($user_id): PromiseInterface{
         //Get Balance
         return $this->getBalance($user_id)
-            ->then(function (int $balance) {
+            ->then(function (array $balance) use ($user_id) {
                 //Get my data
-                return $this->db->query('SELECT * FROM coins WHERE `user_id` = ? OR reference = ? ', [$user_id, $user_id])
+                return $this->db->query('SELECT * FROM coins WHERE `user_id` = ? OR reference = ? ORDER BY id DESC LIMIT 500 ', [$user_id, $user_id])
                 ->then(function (QueryResult $result) use ($balance) {
-                    return [
-                        "balance" => $balance,
-                        "meta" =>$result->resultRows,
-                    ];
+                    $balance["meta"] = $result->resultRows;
+                    return $balance;
                 });
             });
     }
@@ -34,32 +32,34 @@ final class CoinsServices{
     public function getBalance($user_id): PromiseInterface{
         //Get added coins
         return $this->db->query('SELECT SUM(amount) AS total_coins FROM coins WHERE `user_id` = ? ', [$user_id])
-            ->then(function (QueryResult $result) {
-                if (empty($result->resultRows)) {
-                    return [];
-                }
+            ->then(function (QueryResult $result) use ($user_id) {
 
-                \var_dump($result);
-                return $result->resultRows[0];
+                $total_coins =  (int) $result->resultRows[0]['total_coins'];
                 //Get uploaded products
                 return $this->db->query('SELECT SUM(upload_price) AS total_upload_amount FROM product WHERE `user_id` = ? ', [$user_id])
-                ->then(function (QueryResult $result) {
-                    if (empty($result->resultRows)) {
-                        return [];
-                    }
+                ->then(function (QueryResult $result) use ($total_coins, $user_id) {
     
-                    \var_dump($result);
-                    return $result->resultRows[0];
+                    $total_upload_amount = (int) $result->resultRows[0]["total_upload_amount"];
                     //Get my transfers
                     return $this->db->query('SELECT SUM(amount) AS total_transfers FROM coins WHERE `reference` = ? ', [$user_id])
-                    ->then(function (QueryResult $result) {
-                        if (empty($result->resultRows)) {
-                            return [];
-                        }
+                    ->then(function (QueryResult $result) use ($total_coins, $total_upload_amount, $user_id) {
+                        
+                        $total_transfers = (int) $result->resultRows[0]["total_transfers"];
         
-                        \var_dump($result);
-                        return $result->resultRows[0];
-        
+                        //Get my last transaction data
+                        return $this->db->query('SELECT * FROM coins WHERE `user_id` = ? ORDER BY id DESC LIMIT 1 ', [$user_id])
+                        ->then(function (QueryResult $result) use ($total_coins, $total_upload_amount, $total_transfers, $user_id) {
+
+                            $balance = $total_coins - $total_upload_amount - $total_transfers;
+                            
+                            return array(
+                                'total_coins'       =>$total_coins,
+                                'total_upload_amount'  =>$total_upload_amount,
+                                'total_transfers'   =>$total_transfers,
+                                'balance'       =>$balance,
+                                'last_credit'   =>$result->resultRows[0]
+                            );
+                        });
                         
                     });
                     
@@ -72,13 +72,13 @@ final class CoinsServices{
     public function create(int $user_id, int $amount, $reference, $method_of_subscription): PromiseInterface {
         $promiseResponse = new \App\Utils\PromiseResponse();
         if(empty($amount)){
-            return $promiseResponse::rejectPromise("Enter amount name");
+            return $promiseResponse::rejectPromise("Enter amount");
         }else if(empty($method_of_subscription)){
             return $promiseResponse::rejectPromise("No method of payment detected");
         }
         
         $query  = "INSERT INTO `coins` (`id`, `user_id`, `amount`, `reference`, `method_of_subscription`) 
-            VALUES (?, ?, ?, ?, ?, ?)";
+            VALUES (?, ?, ?, ?, ?)";
 
         return $this->db->query($query, 
             [
