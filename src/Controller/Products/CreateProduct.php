@@ -46,6 +46,7 @@ final class CreateProduct{
                 $product->user_address_city = $body['user_address_city'] ?? ''; 
                 $product->user_address_lat  = $body['user_address_lat'] ?? ''; 
                 $product->user_address_long = $body['user_address_long'] ?? '';
+                $product->upload_price      = $body['upload_price'] ?? '100';
 
                 $resolve(
                     $this->productServices->create($product)

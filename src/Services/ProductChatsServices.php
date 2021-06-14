@@ -12,12 +12,36 @@ use App\Database;
 final class ProductChatsServices{
     private $db;
 
+    private static function imgSubQuery(string $column){
+        return "JSON_EXTRACT(
+                IFNULL(
+                    (SELECT
+                        CONCAT('[',
+                                GROUP_CONCAT(
+                                    JSON_OBJECT(
+                                        'id',id,
+                                        'product_id',product_id,
+                                        'image_path',image_path,
+                                        'idx',idx
+                                    )
+                                ),
+                        ']')
+                        FROM image_product WHERE  image_product.product_id = $column ORDER BY image_product.idx
+                    ),
+                '[]'),
+            '$')";
+    }
     public function __construct(Database $database){
         $this->db = $database->db;
     }
 
     public function findAll(): PromiseInterface{
-        $query = "SELECT product_chats.* FROM product_chats ORDER BY `id` DESC ";
+        $pImgSubQuery = self::imgSubQuery('product_chats.product_id');
+        $pOfferImgSubQuery = self::imgSubQuery('product_chats.offer_product_id');
+        $query =    "SELECT  product_chats.* 
+                        ,$pImgSubQuery AS product_images
+                        ,$pOfferImgSubQuery AS product_offer_images
+                    FROM product_chats ORDER BY `id` DESC ";
 
         return $this->db->query($query)->then(function (QueryResult $queryResult) {
             return $queryResult->resultRows;
@@ -27,7 +51,15 @@ final class ProductChatsServices{
     }
 
     public function findLatestForTwoUsers($user_id, $second_user_id): PromiseInterface{
-        $query  =   "SELECT * FROM product_chats WHERE 
+        $pImgSubQuery = self::imgSubQuery('product_chats.product_id');
+        $pOfferImgSubQuery = self::imgSubQuery('product_chats.offer_product_id');
+
+        $query  =   "SELECT product_chats.* 
+                        ,$pImgSubQuery AS product_images
+                        ,$pOfferImgSubQuery AS product_offer_images
+                        
+                        
+                        FROM product_chats WHERE 
                         (receiver_id = '$user_id' AND sender_id = '$second_user_id') OR 
                         (receiver_id = '$second_user_id' AND sender_id = '$user_id') 
                     ORDER BY `id` DESC LIMIT 1 ";
@@ -41,9 +73,16 @@ final class ProductChatsServices{
                 throw new \Exception($er);
             });
     }
-
+ 
     private function findById($id): PromiseInterface{
-        $query = "SELECT product_chats.* FROM product_chats WHERE `id` = $id  ";
+        $pImgSubQuery = self::imgSubQuery('product_chats.product_id');
+        $pOfferImgSubQuery = self::imgSubQuery('product_chats.offer_product_id');
+
+        $query =    "SELECT product_chats.* 
+                        ,$pImgSubQuery AS product_images
+                        ,$pOfferImgSubQuery AS product_offer_images
+                        
+                    FROM product_chats WHERE `id` = $id  ";
         return $this->db->query($query)->then(function (QueryResult $result) {
             if (empty($result->resultRows)) {
                 return [];

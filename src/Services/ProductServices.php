@@ -34,7 +34,7 @@ final class ProductServices{
                                     )
                                 ),
                         ']')
-                        FROM image_product WHERE  image_product.product_id = product.product_id
+                        FROM image_product WHERE  image_product.product_id = product.product_id ORDER BY image_product.idx
                     ),
                 '[]'),
             '$') AS images";
@@ -427,8 +427,8 @@ final class ProductServices{
             `product` 
                 (`product_id`, `order_id`, `product_name`, `category`, `sub_category`, `price`, `product_description`, 
                 `product_suggestion`, `product_condition`, `product_status`, `user_id`, `user_address`, 
-                `user_address_city`, `user_address_lat`, `user_address_long`) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                `user_address_city`, `user_address_lat`, `user_address_long`, `upload_price`) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
         return $this->db->query($query, [
                 NULL, 
@@ -445,7 +445,8 @@ final class ProductServices{
                 $product-> user_address, 
                 $product-> user_address_city, 
                 $product-> user_address_lat, 
-                $product-> user_address_long
+                $product-> user_address_long, 
+                $product-> upload_price
             ])->then(function () use ($product) {
                 return $this->findOne('LAST_INSERT_ID()', $product->user_id);
             },

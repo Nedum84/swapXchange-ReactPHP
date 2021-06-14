@@ -21,5 +21,6 @@ class ProductModel{
     public $user_address_city;
     public $user_address_lat;
     public $user_address_long;
+    public $upload_price;
 }
 ?>

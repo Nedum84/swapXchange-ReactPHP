@@ -28,7 +28,7 @@ final class AgoraCallToken{
             self::$appID, 
             self::$appCertificate, 
             $channelName, 
-            $uid, 
+            0, // $uid,
             self::$role, 
             $privilegeExpiredTs
         );
