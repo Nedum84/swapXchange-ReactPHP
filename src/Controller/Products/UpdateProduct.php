@@ -20,7 +20,10 @@ final class UpdateProduct{
     public function __invoke(ServerRequestInterface $request, string $product_id){
         // $body = json_decode((string) $request->getBody(), true);
         $body = $request->getBody();
+        assert($body instanceof \Psr\Http\Message\StreamInterface);
+        assert($body instanceof \React\Stream\ReadableStreamInterface);
 
+        
         return new \React\Promise\Promise(function ($resolve) use ($body, $request, $product_id) {
             $requestBody='';
             $body->on('data', function ($chunk) use (&$requestBody) {

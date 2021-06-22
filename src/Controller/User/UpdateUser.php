@@ -24,7 +24,7 @@ final class UpdateUser{
             $body->on('data', function ($chunk) use (&$requestBody) {
                 $requestBody .= $chunk;
             });
-            $body->on('close', function () use ($resolve,&$requestBody, $request) {
+            $body->on('close', function () use ($resolve, &$requestBody, $request) {
                 $body               = json_decode($requestBody, true);
                 $authPayload = \App\Utils\GetAuthPayload::getPayload($request);
                 $user_id = $authPayload->user_id;
@@ -33,7 +33,7 @@ final class UpdateUser{
                 $user->uid        = $body['uid'] ?? ''; 
                 $user->name      = $body['name'] ?? ''; 
                 $user->email          = $body['email'] ?? ''; 
-                $user->mobile_number      = $body['mobile_number'] ?? ''; 
+                $user->mobile_number    = $body['mobile_number'] ?? ''; 
                 $user->profile_photo    = $body['profile_photo'] ?? ''; 
                 $user->device_token     = $body['device_token'] ?? ''; 
                 $user->user_app_version = $body['user_app_version'] ?? ''; 

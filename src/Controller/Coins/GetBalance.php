@@ -23,7 +23,7 @@ final class GetBalance{
             ->then(function(array $balance) {
                 if(\count($balance)==0)
                     return JsonResponse::badRequest("User Found");
-                return JsonResponse::ok(["balance" => $balance]);
+                return JsonResponse::ok($balance);
             },function ($er){
                 return JsonResponse::badRequest($er);
         });

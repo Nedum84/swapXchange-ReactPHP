@@ -18,8 +18,9 @@ final class ProductServices{
     public const ACTIVE_PRODUCT_STATUS          = 3;
     public const COMPLETED_PRODUCT_STATUS       = 4;
     public const DELETED_PRODUCT_STATUS         = 5;
+    public const BLOCKED_PRODUCT_STATUS         = 6;
 
-    private static function imgSubQuery(){
+    public static function imgSubQuery(){
         return "JSON_EXTRACT(
                 IFNULL(
                     (SELECT
@@ -34,12 +35,13 @@ final class ProductServices{
                                     )
                                 ),
                         ']')
-                        FROM image_product WHERE  image_product.product_id = product.product_id ORDER BY image_product.idx
+                        FROM image_product WHERE  image_product.product_id = product.product_id 
+                        ORDER BY CAST(image_product.idx AS UNSIGNED )
                     ),
                 '[]'),
             '$') AS images";
     }
-    private static function userSubQuery(){
+    public static function userSubQuery(){
         return "JSON_EXTRACT(
                     IFNULL(
                         (SELECT
@@ -84,25 +86,51 @@ final class ProductServices{
                                 )
                         ),
                     '[]'),
-                '$') AS suggestions";
+                '$') AS suggestions
+                
+                
+                , (
+                    SELECT COUNT(*) FROM product_views  WHERE product_views.product_id = product.product_id              
+                ) as no_of_views
+            ";
     }
 
     //Adding number of products on category/subcategory row results
-    public static function noOfProductQuery($user_lat, $user_long, $extra = ""){
-        $product_status = \App\Services\ProductServices::ACTIVE_PRODUCT_STATUS;
-        $radius = \App\Services\ProductServices::RADIUS;
-        return "SELECT 
-                    COUNT(
-                        (((acos(sin(('$user_lat'*pi()/180)) * 
-                        sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
-                        *  cos((`user_address_lat`*pi()/180)) * 
-                        cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
-                    ) AS distance
+    public function noOfProductQuery($user_id, $groupBy = "GROUP BY category"): PromiseInterface{
+        $userServices = new \App\Services\UserServices($this->database);
+        
+        return $userServices->findOne($user_id)->then(function ($user) use ($groupBy){
 
-                from product 
-                WHERE product_status = '$product_status' $extra
-                having distance < '$radius'
-        ";
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+            $product_status = self::ACTIVE_PRODUCT_STATUS;
+            $radius = self::RADIUS;
+
+            $query ="SELECT 
+                        category,
+                        sub_category,
+                        COUNT(product.product_id) as no_of_products
+                        ,(((acos(sin(('$user_lat'*pi()/180)) * 
+                        sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
+                        * 
+                        cos((`user_address_lat`*pi()/180)) * 
+                        cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
+                        AS distance
+
+                    from product 
+                    WHERE product_status = '$product_status'
+                    $groupBy 
+                    having distance < '$radius'
+                    ";
+
+            return $this->db->query($query)
+            ->then(function (QueryResult $queryResult) {
+                return $queryResult->resultRows;
+            },function ($er){
+                throw new \Exception($er);
+            });
+        });
     }
 
     private function selectQuery(
@@ -127,6 +155,9 @@ final class ProductServices{
                 AS distance
                 ,$imgSubQuery
                 ,$userSubQuery
+                , (
+                    SELECT COUNT(*) FROM product_views  WHERE product_views.product_id = product.product_id              
+                ) as no_of_views
 
 
 
@@ -312,6 +343,7 @@ final class ProductServices{
                 });
             });
     }
+    
     public function findOne($pId): PromiseInterface{
         $imgSubQuery = self::imgSubQuery();
         $userSubQuery = self::userSubQuery();
@@ -326,7 +358,8 @@ final class ProductServices{
 
     public function findMyProducts($user_id, $offset, $limit): PromiseInterface{
         $imgSubQuery = self::imgSubQuery();
-        $query = "SELECT product.*, $imgSubQuery 
+        $userSubQuery = self::userSubQuery();
+        $query = "SELECT product.*, $imgSubQuery , $userSubQuery
                     FROM product 
                         WHERE user_id = $user_id 
                             ORDER BY product_id DESC 

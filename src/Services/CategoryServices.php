@@ -18,25 +18,35 @@ final class CategoryServices{
         $this->database = $database;
     }
 
+    private function getNumberOfProduct($categories, $products){
+        $result = [];
+        foreach ($categories as $category) {
+            foreach ($products as $product) {
+                if ($category["category_id"] == $product["category"]) {
+                    $category["no_of_products"] = $product["no_of_products"];
+                } else {
+                    if (empty($category["no_of_products"])) {
+                        $category["no_of_products"] = "0";
+                    }
+                }
+            }
+
+            $result[] = $category;
+        }
+        return $result;
+    }
+
     public function findAll($user_id): PromiseInterface{
-        $userServices = new \App\Services\UserServices($this->database);
-        return $userServices->findOne($user_id)->then(function ($user) {
+        $groupBy = "GROUP BY category";
+        $productServices = new \App\Services\ProductServices($this->database);
+        return $productServices->noOfProductQuery($user_id, $groupBy)->then(function ($products) {
+            
+            $query = "SELECT category.* FROM category ORDER BY `idx` ";
+            return $this->db->query($query)->then(function (QueryResult $queryResult) use ($products) {
+                $categories =  $queryResult->resultRows;
+                $result = $this->getNumberOfProduct($categories, $products);
 
-            $user = (object)$user;
-            $user_lat = $user->address_lat;
-            $user_long = $user->address_long;
-            $extra = "AND product.category = category.category_id";
-
-            $no_of_product_query = \App\Services\ProductServices::noOfProductQuery($user_lat, $user_long, $extra);
-            $query = "SELECT category.*,
-                        -- no of products for this categories
-                            ($no_of_product_query) as no_of_products
-
-                        FROM category
-                        ORDER BY `idx` ";
-
-            return $this->db->query($query)->then(function (QueryResult $queryResult) {
-                return $queryResult->resultRows;
+                return $result;
             },function ($er){
                 throw new \Exception($er);
             });
@@ -46,26 +56,21 @@ final class CategoryServices{
     }
 
     public function findOne($id, $user_id): PromiseInterface{
-        $userServices = new \App\Services\UserServices($this->database);
-        return $userServices->findOne($user_id)->then(function ($user) use ($id) {
-            $user = (object)$user;
-            $user_lat = $user->address_lat;
-            $user_long = $user->address_long;
-            $extra = "AND product.category = category.category_id";
-
-            $no_of_product_query = \App\Services\ProductServices::noOfProductQuery($user_lat, $user_long, $extra);
-            $query = "SELECT category.*,
-                        -- no of products for this  categories
-                            ($no_of_product_query) as no_of_products
-
-                        FROM category
-                        WHERE `category_id` = $id  ";
-
-            return $this->db->query($query)->then(function (QueryResult $result) {
-                if (empty($result->resultRows)) {
+        $groupBy = "GROUP BY category";
+        $productServices = new \App\Services\ProductServices($this->database);
+        return $productServices->noOfProductQuery($user_id, $groupBy)->then(function ($products) use ($id) {
+            
+            $query = "SELECT category.* FROM category WHERE `category_id` = $id  ";
+            return $this->db->query($query)->then(function (QueryResult $queryResult) use ($products) {
+                if (empty($queryResult->resultRows)) {
                     return [];
                 }
-                return $result->resultRows[0];
+                // return $queryResult->resultRows[0];
+
+                $categories =  $queryResult->resultRows;
+                $result = $this->getNumberOfProduct($categories, $products);
+
+                return $result;
             },function ($er){
                 throw new \Exception($er);
             });

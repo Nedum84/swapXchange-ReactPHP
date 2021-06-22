@@ -60,9 +60,18 @@ final class RoutesIndex{
         $this->routes->addGroup('/agora', function (RouteCollector $r) {
             new \App\Routes\v1\AgoraTokenRoutes($r, $this->dbCon);
         });
+        
         //Coins and Credit
         $this->routes->addGroup('/coins', function (RouteCollector $r) {
             new \App\Routes\v1\CoinsRoutes($r, $this->dbCon);
+        });
+        //Saved Products
+        $this->routes->addGroup('/saved', function (RouteCollector $r) {
+            new \App\Routes\v1\SavedProductsRoutes($r, $this->dbCon);
+        });
+        //Product Views
+        $this->routes->addGroup('/productviews', function (RouteCollector $r) {
+            new \App\Routes\v1\ProductViewsRoutes($r, $this->dbCon);
         });
     }
 }

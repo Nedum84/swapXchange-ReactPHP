@@ -56,10 +56,10 @@ $coinsAuth = new Guard('/v1/coins', $authenticator);
 // Add routes to the server
 $server = new React\Http\Server(
     $loop, 
-    new JsonRequestDecoder(),
+    // new JsonRequestDecoder(),
     // new \React\Http\Middleware\RequestBodyBufferMiddleware(20 * 1024 * 1024), // 20 MiB per request
     new \React\Http\Middleware\StreamingRequestMiddleware(),//To use stream data chunk
-    // new \React\Http\Middleware\RequestBodyParserMiddleware(),
+    new \React\Http\Middleware\RequestBodyParserMiddleware(),
     $productAuth, 
     $catAuth, 
     $subCatAuth, 

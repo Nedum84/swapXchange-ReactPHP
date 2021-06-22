@@ -8,15 +8,18 @@ use Psr\Http\Message\ServerRequestInterface;
 use React\Http\Message\Response;
 use App\Services\UserServices;
 use App\Services\TokenServices;
+use \App\Services\CoinsServices;
 
 
 final class CreateUser{
     private $userServices;
     private $tokenServices;
+    private $coinsServices;
 
     public function __construct(Database $db){
         $this->userServices = new UserServices($db);
         $this->tokenServices = new TokenServices($db);
+        $this->coinsServices = new CoinsServices($db);
     }
 
     public function __invoke(ServerRequestInterface $request){
@@ -50,7 +53,7 @@ final class CreateUser{
                     $this->userServices->findByUid($user->uid)
                         ->then(function(array $oldUser) use ($user) {
                             //If already registered, return the user
-                            if(count($oldUser)!=0&&!empty($oldUser)){
+                            if(count($oldUser)!=0&&!empty($oldUser)){ 
                                 //Update user
                                 if(empty($oldUser['name'])){
                                     $update = $this->userServices->update($user, $oldUser["user_id"]);
@@ -78,11 +81,18 @@ final class CreateUser{
                                     if(gettype($user)!=="array"){
                                         return JsonResponse::badRequest($user);
                                     };
-                                    //Fetch token...
-                                    return $this->tokenServices->generateToken($user['user_id'],$user['uid'])->then(
-                                        function(array $tokens) use ($user){
-                                        return JsonResponse::ok(["user" => $user,"tokens"=>$tokens]);
-                                    }); 
+
+                                    //Add Registration Coins Bonus
+                                    $amount = 500;
+                                    $methodOfSub = "registration";
+                                    return $this->coinsServices->create($user['user_id'], $amount, "", $methodOfSub)
+                                    ->then(function ($balance) use ($user) {
+                                        //Fetch token...
+                                        return $this->tokenServices->generateToken($user['user_id'],$user['uid'])->then(
+                                            function(array $tokens) use ($user){
+                                            return JsonResponse::ok(["user" => $user,"tokens"=>$tokens]);
+                                        }); 
+                                    });
                                 },
                                 function (\Exception $error) {
                                     return JsonResponse::badRequest($error->getMessage());
