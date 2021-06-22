@@ -20,6 +20,14 @@ class UserModel{
     public $online_status;
     public $user_app_version;
     public $last_login;
-  
+    public $notification;
+
+
+    public $defaultNotification = [
+        "general"=>1,
+        "call"=>1,
+        "chat"=>1,
+        "product"=>1
+    ];
 }
 ?>

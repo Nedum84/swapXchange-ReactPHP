@@ -104,6 +104,8 @@ final class ProductServices{
             $user = (object)$user;
             $user_lat = $user->address_lat;
             $user_long = $user->address_long;
+            // $user_lat = 36.6103179;
+            // $user_long = -121.8449227;
             $product_status = self::ACTIVE_PRODUCT_STATUS;
             $radius = self::RADIUS;
 

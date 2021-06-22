@@ -31,6 +31,9 @@ final class CategoryServices{
                 }
             }
 
+            if (empty($subcategory["no_of_products"])) {
+                $subcategory["no_of_products"] = "0";
+            }
             $result[] = $category;
         }
         return $result;
@@ -65,7 +68,6 @@ final class CategoryServices{
                 if (empty($queryResult->resultRows)) {
                     return [];
                 }
-                // return $queryResult->resultRows[0];
 
                 $categories =  $queryResult->resultRows;
                 $result = $this->getNumberOfProduct($categories, $products);

@@ -33,6 +33,9 @@ final class SubCategoryServices{
                 }
             }
 
+            if (empty($subcategory["no_of_products"])) {
+                $subcategory["no_of_products"] = "0";
+            }
             $result[] = $subcategory;
         }
         return $result;

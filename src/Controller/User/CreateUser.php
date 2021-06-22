@@ -46,7 +46,9 @@ final class CreateUser{
                 $user->device_token     = $body['device_token'] ?? ''; 
                 $user->online_status    = $body['online_status']; 
                 $user->user_app_version = $body['user_app_version'] ?? ''; 
+                $user->notification     = \json_encode($body['notification'] ?? (object)$user->defaultNotification); 
                 $user->last_login       = date("Y-m-d H:i:s",\time()); 
+
 
                 $resolve(
                     //Check if the uuid(uid) is already registered

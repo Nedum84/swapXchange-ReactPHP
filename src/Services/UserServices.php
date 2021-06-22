@@ -56,7 +56,8 @@ final class UserServices{
                         device_token = ? , 
                         online_status = ? , 
                         user_app_version = ? , 
-                        last_login = ?
+                        last_login = ?,
+                        `notification` = ?
                         WHERE user_id = ? ";
 
                 return $this->db->query($query, [
@@ -68,6 +69,7 @@ final class UserServices{
                     $user->online_status ?? $oldUser["online_status"], 
                     $user->user_app_version, 
                     $user->last_login, 
+                    $user->notification ?? $user->defaultNotification, 
 
                     $user_id
                 ])->then(function () use ($oldUser) {
@@ -125,8 +127,8 @@ final class UserServices{
     public function create(UserModel $user): PromiseInterface {
         $query = "INSERT INTO `users` (`user_id`, `uid`, `name`, `email`, `mobile_number`, 
                     `address`, `address_lat`, `address_long`, `state`, 
-                    `profile_photo`, `device_token`, `user_app_version`, `last_login`) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    `profile_photo`, `device_token`, `user_app_version`, `last_login`, `notification`) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         return $this->db->query($query, [
                 NULL, 
@@ -142,6 +144,7 @@ final class UserServices{
                 $user->device_token, 
                 $user->user_app_version, 
                 $user->last_login,
+                $user->notification ?? $user->defaultNotification, 
             ])->then(function () use ($user) {
                 return $this->findByUid($user->uid);
             },

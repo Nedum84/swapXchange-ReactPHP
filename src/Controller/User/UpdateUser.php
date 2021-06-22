@@ -37,7 +37,9 @@ final class UpdateUser{
                 $user->profile_photo    = $body['profile_photo'] ?? ''; 
                 $user->device_token     = $body['device_token'] ?? ''; 
                 $user->user_app_version = $body['user_app_version'] ?? ''; 
+                $user->notification     = \json_encode($body['notification'] ?? (object)$user->defaultNotification); 
                 $user->last_login       = date("Y-m-d H:i:s",\time()) ?? $body['last_login']; 
+
 
                 $resolve(
                     $this->userServices->update($user, $user_id)
