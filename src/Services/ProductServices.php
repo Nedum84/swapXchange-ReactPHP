@@ -413,6 +413,30 @@ final class ProductServices{
         });
     }
 
+    //--> Find Nearby Usersf for a product ID
+    public function findNearbyUsers($product_lat, $product_long): PromiseInterface{
+        $radius = self::RADIUS;
+        $query = "SELECT `user_id`, `device_token`, `notification`, `name`, 
+                (((acos(sin(('$product_lat'*pi()/180)) * 
+                sin((`address_lat`*pi()/180))+cos(('$product_lat'*pi()/180))
+                * 
+                cos((`address_lat`*pi()/180)) * 
+                cos((('$product_long'- `address_long`)*pi()/180))))*180/pi())*60*1.1515)
+                AS distance
+
+            from users 
+            having distance < '$radius' 
+            ORDER BY distance
+            LIMIT 100
+        ";
+
+        return $this->db->query($query)
+        ->then(function (QueryResult $queryResult) {
+            return $queryResult->resultRows;
+        },function ($er){
+            throw new \Exception($er);
+        });
+    }
 
     public function update(ProductModel $product , int $product_id): PromiseInterface{
         return $this->findOne($product_id, $product->user_id)

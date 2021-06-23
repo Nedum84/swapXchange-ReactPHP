@@ -16,8 +16,7 @@ final class CreateUser
         $this->users = $users;
     }
 
-    public function __invoke(ServerRequestInterface $request)
-    {
+    public function __invoke(ServerRequestInterface $request){
         $user = json_decode((string) $request->getBody(), true);
         $name = $user['name'] ?? '';
         $email = $user['email'] ?? '';

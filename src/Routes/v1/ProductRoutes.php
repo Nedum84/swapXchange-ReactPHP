@@ -35,6 +35,7 @@ final class ProductRoutes{
         $this->routes->post('', new \App\Controller\Products\CreateProduct($this->dbCon));
         $this->routes->patch('/{product_id}', new \App\Controller\Products\UpdateProduct($this->dbCon));
         $this->routes->get('/{product_id}', new \App\Controller\Products\FindOne($this->dbCon));
+        $this->routes->get('/nearbyuserss/{product_lat}/{product_long}', new \App\Controller\Products\FindNearPeople($this->dbCon));
     }
 }
 
