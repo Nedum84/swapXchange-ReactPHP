@@ -109,7 +109,7 @@ final class SubCategoryServices{
                 $subcategories =  $queryResult->resultRows;
                 $result = $this->getNumberOfProduct($subcategories, $products);
 
-                return $result;
+                return $result[0];
             },function ($er){
                 throw new \Exception($er);
             });
