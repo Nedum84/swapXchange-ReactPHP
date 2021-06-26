@@ -8,10 +8,10 @@ $baseDir = dirname($vendorDir);
 return array(
     'WyriHaximus\\React\\ChildProcess\\Pool\\' => array($vendorDir . '/wyrihaximus/react-child-process-pool/src'),
     'WyriHaximus\\React\\ChildProcess\\Messenger\\' => array($vendorDir . '/wyrihaximus/react-child-process-messenger/src'),
-    'WyriHaximus\\React\\' => array($vendorDir . '/wyrihaximus/react-child-process-promise/src', $vendorDir . '/wyrihaximus/ticking-promise/src'),
+    'WyriHaximus\\React\\' => array($vendorDir . '/wyrihaximus/ticking-promise/src', $vendorDir . '/wyrihaximus/react-child-process-promise/src'),
     'WyriHaximus\\FileDescriptors\\' => array($vendorDir . '/wyrihaximus/file-descriptors/src'),
     'WyriHaximus\\CpuCoreDetector\\' => array($vendorDir . '/wyrihaximus/cpu-core-detector/src'),
-    'WyriHaximus\\' => array($vendorDir . '/wyrihaximus/json-throwable/src', $vendorDir . '/wyrihaximus/json-utilities/src'),
+    'WyriHaximus\\' => array($vendorDir . '/wyrihaximus/json-utilities/src', $vendorDir . '/wyrihaximus/json-throwable/src'),
     'Tivie\\OS\\' => array($vendorDir . '/tivie/php-os-detector/src'),
     'RingCentral\\Psr7\\' => array($vendorDir . '/ringcentral/psr7/src'),
     'Recoil\\ReferenceKernel\\' => array($vendorDir . '/recoil/recoil/src'),

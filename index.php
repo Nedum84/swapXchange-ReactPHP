@@ -17,11 +17,21 @@ require __DIR__ . '/vendor/autoload.php';
 
 $user = "ned";
 $pass = "ned";
-$db = "swapxchange";
-$host = "lacalhost";
+$db_name = "swapxchange";
+$host = "localhost";
 $host = "192.168.64.2";
 
-$url = "$user:$pass@$host/$db";
+
+// $user = "swapx_change";
+// $pass = "Nellyson23#$";
+// $db_name = "swap_x_change";
+// $host = "localhost:3306";
+
+// $url = "$user:$pass@$host/$db";
+$url = rawurlencode($user) . ':' . rawurlencode($pass) . "@".$host."/".$db_name;
+
+
+
 
 $loop       = \React\EventLoop\Factory::create();
 $factory    = new Factory($loop);

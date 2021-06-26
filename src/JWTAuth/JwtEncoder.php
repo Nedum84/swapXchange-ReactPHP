@@ -9,28 +9,27 @@ final class JwtEncoder{
 
     private $privateKey = <<<EOD
     -----BEGIN RSA PRIVATE KEY-----
-    MIICXAIBAAKBgQC8kGa1pSjbSYZVebtTRBLxBz5H4i2p/llLCrEeQhta5kaQu/Rn
-    vuER4W8oDH3+3iuIYW4VQAzyqFpwuzjkDI+17t5t0tyazyZ8JXw+KgXTxldMPEL9
-    5+qVhgXvwtihXC1c5oGbRlEDvDF6Sa53rcFVsYJ4ehde/zUxo6UvS7UrBQIDAQAB
-    AoGAb/MXV46XxCFRxNuB8LyAtmLDgi/xRnTAlMHjSACddwkyKem8//8eZtw9fzxz
-    bWZ/1/doQOuHBGYZU8aDzzj59FZ78dyzNFoF91hbvZKkg+6wGyd/LrGVEB+Xre0J
-    Nil0GReM2AHDNZUYRv+HYJPIOrB0CRczLQsgFJ8K6aAD6F0CQQDzbpjYdx10qgK1
-    cP59UHiHjPZYC0loEsk7s+hUmT3QHerAQJMZWC11Qrn2N+ybwwNblDKv+s5qgMQ5
-    5tNoQ9IfAkEAxkyffU6ythpg/H0Ixe1I2rd0GbF05biIzO/i77Det3n4YsJVlDck
-    ZkcvY3SK2iRIL4c9yY6hlIhs+K9wXTtGWwJBAO9Dskl48mO7woPR9uD22jDpNSwe
-    k90OMepTjzSvlhjbfuPN1IdhqvSJTDychRwn1kIJ7LQZgQ8fVz9OCFZ/6qMCQGOb
-    qaGwHmUK6xzpUbbacnYrIM6nLSkXgOAwv7XXCojvY614ILTK3iXiLBOxPu5Eu13k
-    eUz9sHyD6vkgZzjtxXECQAkp4Xerf5TGfQXGXhxIX52yH+N2LtujCdkQZjXAsGdm
-    B2zNzvrlgRmgBrklMTrMYgm1NPcW+bRLGcwgW2PTvNM=
+    MIICXAIBAAKBgQDFixcqSaV/2g6tqDXXQr1YVBoa8PpaOvwHtzCwvMnSEXGSouxn
+    ge1b1iZ1L+lhQmGmF8gOTlOHZdMYb6bvG5ScwHz7nOsGdG1waPIGpFXjp/wetiU6
+    9O2B2twLwcnhUKLSkwtdfymFpIUbKIsg3bGuR/z/R6Wx4LjLJbNZjlgt2wIDAQAB
+    AoGABStdoNKqjQz0w2CagBaUA+K3iCr0MjZG8CDAGm/mTCP+t9qhmxfQUU3qVbi6
+    P7xP99u5dX5hOzLT8ljBopIzMlcfY5dTglqhJB0anxyMmIiR2qMayWQVfj4DqAix
+    MnYv128IZjLRiLcS07SYfikr1uxvhnIheOW1YbBOX9KL0NECQQDwcXd70KaYtbn5
+    oA/ktS38uDuCjFt386uBGlnRcfIIdXSwFJo6ZJrGObjwI05rqVkruFLojksNVMFU
+    9gRrVU0zAkEA0lMPSuJL1dJ4c2PYH1qwa3fzxt1QgXirSOd0FqvzjbE6050qYerA
+    ruUERATkQkQG2ezFM6pt9rn1j6Xgt5cMuQJAZVjubBn+ns+6nCWDjXtw7t0Y+GYB
+    CAaFe92HjmjhA/++N5n3iDVvp64c7dtz6p1vIKaJC80uhWf8NbudEUDbUQJAJz/E
+    zM6qJD7gp3fsbv13iraZ0XSff2nLXRGEQm7YRoraVX8w15D9YCXww9i91/fl52kd
+    6+RUHQTa5HGqG9ieUQJBANmg70MNytJGZxjBs5DK+IUucbMOjcRh5IONW/lH/ik+
+    JYTw0IGxGBWDaf3uLW1L46oRYyedA4hpPoGugZ7XYuU=
     -----END RSA PRIVATE KEY-----
     EOD;
-    
     private $publicKey =  <<<EOD
     -----BEGIN PUBLIC KEY-----
-    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC8kGa1pSjbSYZVebtTRBLxBz5H
-    4i2p/llLCrEeQhta5kaQu/RnvuER4W8oDH3+3iuIYW4VQAzyqFpwuzjkDI+17t5t
-    0tyazyZ8JXw+KgXTxldMPEL95+qVhgXvwtihXC1c5oGbRlEDvDF6Sa53rcFVsYJ4
-    ehde/zUxo6UvS7UrBQIDAQAB
+    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDFixcqSaV/2g6tqDXXQr1YVBoa
+    8PpaOvwHtzCwvMnSEXGSouxnge1b1iZ1L+lhQmGmF8gOTlOHZdMYb6bvG5ScwHz7
+    nOsGdG1waPIGpFXjp/wetiU69O2B2twLwcnhUKLSkwtdfymFpIUbKIsg3bGuR/z/
+    R6Wx4LjLJbNZjlgt2wIDAQAB
     -----END PUBLIC KEY-----
     EOD;
 
@@ -52,3 +51,5 @@ final class JwtEncoder{
         }
     }
 }
+
+?>

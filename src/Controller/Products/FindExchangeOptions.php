@@ -20,9 +20,6 @@ final class FindExchangeOptions{
 
         return $this->productServices->findExchangeOptions($product_id, $user_id, $offset, $limit)
             ->then(function(array $product) {
-                if(count($product)==0){
-                    return JsonResponse::notFound();
-                };
                 return JsonResponse::ok(["products" => $product]);
             },function ($er){
                 return JsonResponse::badRequest($er);

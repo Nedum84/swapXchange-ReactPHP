@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => 'a97d042c33e4ecbd76a6bb7ee69cc22ebfd4ba24',
+    'reference' => '0aa55e8845f6d1868f934d02c84f382af3fb754e',
     'name' => 'campuscope/campuscope',
   ),
   'versions' => 
@@ -36,7 +36,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'a97d042c33e4ecbd76a6bb7ee69cc22ebfd4ba24',
+      'reference' => '0aa55e8845f6d1868f934d02c84f382af3fb754e',
     ),
     'doctrine/inflector' => 
     array (
