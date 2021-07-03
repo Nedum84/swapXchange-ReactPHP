@@ -74,7 +74,7 @@ final class ProductChatsServices{
             });
     }
  
-    private function findById($id): PromiseInterface{
+    public function findById($id): PromiseInterface{
         $pImgSubQuery = self::imgSubQuery('product_chats.product_id');
         $pOfferImgSubQuery = self::imgSubQuery('product_chats.offer_product_id');
 
@@ -105,6 +105,8 @@ final class ProductChatsServices{
                         `offer_product_id` = ? , 
                         sender_id = ?  , 
                         receiver_id = ?  , 
+                        sender_closed_deal = ?  , 
+                        receiver_closed_deal = ?  , 
                         chat_status = ? 
 
                         WHERE id = ? ";
@@ -114,6 +116,8 @@ final class ProductChatsServices{
                     $productChatsModel->offer_product_id    ??  $oldData['offer_product_id'],
                     $productChatsModel->sender_id           ??  $oldData['sender_id'],
                     $productChatsModel->receiver_id         ??  $oldData['receiver_id'],
+                    $productChatsModel->sender_closed_deal  ??  $oldData['sender_closed_deal'],
+                    $productChatsModel->receiver_closed_deal??  $oldData['receiver_closed_deal'],
                     $productChatsModel->chat_status         ??  $oldData['chat_status'],
 
                     $productChatsModel->id

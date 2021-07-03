@@ -51,13 +51,24 @@ final class CoinsServices{
                         ->then(function (QueryResult $result) use ($total_coins, $total_upload_amount, $total_transfers, $user_id) {
 
                             $balance = $total_coins - $total_upload_amount - $total_transfers;
+                            $last_credit = $result->resultRows[0];
+                            $last_credit["current_time"] = \date("Y-m-d H:i:s",\time());
+                            if (empty($result->resultRows[0])) {
+                                $last_credit["id"] = "";
+                                $last_credit["user_id"] = "0";
+                                $last_credit["amount"] = "0";
+                                $last_credit["reference"] = "0";
+                                $last_credit["method_of_subscription"] = "registration";
+                                $last_credit["created_at"] = \date("Y-m-d H:i:s",\time());
+                            }
+                            
                             
                             return array(
                                 'total_coins'       =>$total_coins,
                                 'total_upload_amount'  =>$total_upload_amount,
                                 'total_transfers'   =>$total_transfers,
                                 'balance'       =>$balance,
-                                'last_credit'   =>$result->resultRows[0]
+                                'last_credit'   =>$last_credit
                             );
                         });
                         

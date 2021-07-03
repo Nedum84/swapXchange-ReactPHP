@@ -11,6 +11,8 @@ class ProductChatsModel{
     public $offer_product_id;
     public $sender_id;
     public $receiver_id;
+    public $sender_closed_deal = 0;
+    public $receiver_closed_deal = 0;
     public $chat_status;
 }
 ?>

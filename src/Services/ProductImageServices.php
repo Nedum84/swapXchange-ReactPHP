@@ -121,7 +121,7 @@ final class ProductImageServices{
                         $product_id,
                         $image_path,
                         $idx,
-                    ])->then(function () use ($user_id) {
+                    ])->then(function () {
                         return $this->findOne('LAST_INSERT_ID()');
                     },
                     function (\Exception $error) {

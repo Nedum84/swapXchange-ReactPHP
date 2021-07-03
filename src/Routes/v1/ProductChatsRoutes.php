@@ -24,7 +24,7 @@ final class ProductChatsRoutes{
         $this->routes->post('', new \App\Controller\ProductChats\CreateProductChats($this->dbCon));
         $this->routes->patch('/{id}', new \App\Controller\ProductChats\UpdateProductChats($this->dbCon));
         $this->routes->get('/user/{user_id}', new \App\Controller\ProductChats\FindLatestForTwoUsers($this->dbCon));
-        // $this->routes->get('/{id}', new \App\Controller\ProductChats\FindLatestForTwoUsers($this->dbCon));
+        $this->routes->get('/{id}', new \App\Controller\ProductChats\FindOne($this->dbCon));
     }
 }
 

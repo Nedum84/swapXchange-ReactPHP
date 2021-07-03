@@ -35,12 +35,14 @@ final class CreateProductChats{
                 $pChat->offer_product_id  = $body['offer_product_id']??'0'; 
                 $pChat->sender_id        = $body['sender_id']??$user_id; 
                 $pChat->receiver_id        = $body['receiver_id']??'0'; 
+                $pChat->sender_closed_deal = $body['sender_closed_deal']??'0'; 
+                $pChat->receiver_closed_deal = $body['receiver_closed_deal']??'0'; 
+                $pChat->chat_status     = $body['chat_status']??null; 
 
                 $resolve(
-                    $this->productChatsServices->create($pChat) 
+                    $this->productChatsServices->create($pChat)
                        ->then(
                            function ($response) {
-                               echo gettype($response);
                                if(gettype($response)!=="array"){
                                    return JsonResponse::badRequest($response);
                                };
