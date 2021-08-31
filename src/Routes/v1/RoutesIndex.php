@@ -73,6 +73,22 @@ final class RoutesIndex{
         $this->routes->addGroup('/productviews', function (RouteCollector $r) {
             new \App\Routes\v1\ProductViewsRoutes($r, $this->dbCon);
         });
+        //App Settings
+        $this->routes->addGroup('/appsettings', function (RouteCollector $r) {
+            new \App\Routes\v1\AppSettingsRoutes($r, $this->dbCon);
+        });
+        //Faqs
+        $this->routes->addGroup('/faqs', function (RouteCollector $r) {
+            new \App\Routes\v1\FaqsRoutes($r, $this->dbCon);
+        });
+        //Feedback
+        $this->routes->addGroup('/feedback', function (RouteCollector $r) {
+            new \App\Routes\v1\FeedbackRoutes($r, $this->dbCon);
+        });
+        //Reported products
+        $this->routes->addGroup('/reportedproducts', function (RouteCollector $r) {
+            new \App\Routes\v1\ReportedProductsRoutes($r, $this->dbCon);
+        });
     }
 }
 

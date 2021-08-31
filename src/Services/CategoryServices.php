@@ -18,38 +18,41 @@ final class CategoryServices{
         $this->database = $database;
     }
 
-    private function getNumberOfProduct($categories, $products){
-        $result = [];
-        foreach ($categories as $category) {
-            foreach ($products as $product) {
-                if ($category["category_id"] == $product["category"]) {
-                    $category["no_of_products"] = $product["no_of_products"];
-                } else {
-                    if (empty($category["no_of_products"])) {
-                        $category["no_of_products"] = "0";
-                    }
-                }
-            }
-
-            if (empty($subcategory["no_of_products"])) {
-                $subcategory["no_of_products"] = "0";
-            }
-            $result[] = $category;
-        }
-        return $result;
+    //Count number of product query
+    private function productCountQuery($user_lat, $user_long){
+        $product_status = \App\Services\ProductServices::ACTIVE_PRODUCT_STATUS;
+        $radius = \App\Services\ProductServices::RADIUS;
+        return "(
+                SELECT COUNT(*)
+                from product 
+                WHERE product_status = '$product_status'
+                AND product.category = category.category_id
+                AND (
+                        (((acos(sin(('$user_lat'*pi()/180)) * 
+                        sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
+                        *  cos((`user_address_lat`*pi()/180)) * 
+                        cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
+                ) < '$radius'
+            ) as no_of_products
+        ";
     }
 
     public function findAll($user_id): PromiseInterface{
-        $groupBy = "GROUP BY category";
-        $productServices = new \App\Services\ProductServices($this->database);
-        return $productServices->noOfProductQuery($user_id, $groupBy)->then(function ($products) {
-            
-            $query = "SELECT category.* FROM category ORDER BY `idx` ";
-            return $this->db->query($query)->then(function (QueryResult $queryResult) use ($products) {
-                $categories =  $queryResult->resultRows;
-                $result = $this->getNumberOfProduct($categories, $products);
+        $userServices = new \App\Services\UserServices($this->database);
+        return $userServices->findOne($user_id)->then(function ($user) {
 
-                return $result;
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+
+            $query = $this->productCountQuery($user_lat, $user_long);
+
+            $query = "SELECT category.*, $query
+                    FROM category
+                    ORDER BY `idx` ";
+            
+            return $this->db->query($query)->then(function (QueryResult $queryResult) {
+                return $queryResult->resultRows;
             },function ($er){
                 throw new \Exception($er);
             });
@@ -59,20 +62,22 @@ final class CategoryServices{
     }
 
     public function findOne($id, $user_id): PromiseInterface{
-        $groupBy = "GROUP BY category";
-        $productServices = new \App\Services\ProductServices($this->database);
-        return $productServices->noOfProductQuery($user_id, $groupBy)->then(function ($products) use ($id) {
+        $userServices = new \App\Services\UserServices($this->database);
+        return $userServices->findOne($user_id)->then(function ($user) use ($id) {
+
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+
+            $query = $this->productCountQuery($user_lat, $user_long);
+
+            $query = "SELECT category.*, $query
+                    FROM category
+                    WHERE `category_id` = $id
+                    ORDER BY `idx` ";
             
-            $query = "SELECT category.* FROM category WHERE `category_id` = $id  ";
-            return $this->db->query($query)->then(function (QueryResult $queryResult) use ($products) {
-                if (empty($queryResult->resultRows)) {
-                    return [];
-                }
-
-                $categories =  $queryResult->resultRows;
-                $result = $this->getNumberOfProduct($categories, $products);
-
-                return $result[0];
+            return $this->db->query($query)->then(function (QueryResult $queryResult) {
+                return $queryResult->resultRows;
             },function ($er){
                 throw new \Exception($er);
             });

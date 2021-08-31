@@ -1,36 +1,35 @@
 <?php
 
-namespace App\Controller\Category;
+namespace App\Controller\Faqs;
 
 use App\JsonResponse;
 use App\Database;
 use Psr\Http\Message\ServerRequestInterface;
 use React\Http\Message\Response;
-use App\Services\CategoryServices;
+use App\Services\FaqsServices;
 
 
-
-final class CreateCategory{
-    private $categoryServices;
+final class CreateFaqs{
+    private $faqsServices;
 
     public function __construct(Database $db){
-        $this->categoryServices = new CategoryServices($db);
+        $this->faqsServices = new FaqsServices($db);
     }
 
     public function __invoke(ServerRequestInterface $request){
         $body = json_decode((string) $request->getBody(), true);
-        $category_name        = $body['category_name'] ?? ''; 
-        $category_icon        = $body['category_icon'] ?? ''; 
+        $question        = $body['question'] ?? ''; 
+        $answer        = $body['answer'] ?? ''; 
         //User details...
         $user_id = \App\Utils\GetAuthPayload::getPayload($request)->user_id;
 
-        return $this->categoryServices->create($category_name, $category_icon, $user_id) 
+        return $this->faqsServices->create($user_id, $question, $answer) 
             ->then(
                 function ($response) {
                     if(gettype($response)!=="array"){
                         return JsonResponse::badRequest($response);
                     };
-                    return JsonResponse::created(["category" => $response]);
+                    return JsonResponse::created(["faq" => $response]);
                 },
                 function ($error) {
                     return JsonResponse::badRequest($error->getMessage()??$error);

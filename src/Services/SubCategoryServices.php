@@ -20,38 +20,41 @@ final class SubCategoryServices{
         $this->database = $database;
     }
 
-    private function getNumberOfProduct($subcategories, $products){
-        $result = [];
-        foreach ($subcategories as $subcategory) {
-            foreach ($products as $product) {
-                if ($subcategory["sub_category_id"] == $product["sub_category"]) {
-                    $subcategory["no_of_products"] = $product["no_of_products"];
-                } else {
-                    if (empty($subcategory["no_of_products"])) {
-                        $subcategory["no_of_products"] = "0";
-                    }
-                }
-            }
-
-            if (empty($subcategory["no_of_products"])) {
-                $subcategory["no_of_products"] = "0";
-            }
-            $result[] = $subcategory;
-        }
-        return $result;
+    //Count number of product query
+    private function productCountQuery($user_lat, $user_long){
+        $product_status = \App\Services\ProductServices::ACTIVE_PRODUCT_STATUS;
+        $radius = \App\Services\ProductServices::RADIUS;
+        return "(
+                SELECT COUNT(*)
+                from product 
+                WHERE product_status = '$product_status'
+                AND product.sub_category = subcategory.sub_category_id
+                AND (
+                        (((acos(sin(('$user_lat'*pi()/180)) * 
+                        sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
+                        *  cos((`user_address_lat`*pi()/180)) * 
+                        cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
+                ) < '$radius'
+            ) as no_of_products
+        ";
     }
 
     public function findAll($user_id): PromiseInterface{
-        $groupBy = "GROUP BY sub_category";
-        $productServices = new \App\Services\ProductServices($this->database);
-        return $productServices->noOfProductQuery($user_id, $groupBy)->then(function ($products) {
-            
-            $query = "SELECT subcategory.* FROM subcategory ORDER BY `idx` ";
-            return $this->db->query($query)->then(function (QueryResult $queryResult) use ($products) {
-                $subcategories =  $queryResult->resultRows;
-                $result = $this->getNumberOfProduct($subcategories, $products);
+        $userServices = new \App\Services\UserServices($this->database);
+        return $userServices->findOne($user_id)->then(function ($user) {
 
-                return $result;
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+
+            $query = $this->productCountQuery($user_lat, $user_long);
+
+            $query = "SELECT subcategory.*, $query
+                    FROM subcategory
+                    ORDER BY `idx` ";
+            
+            return $this->db->query($query)->then(function (QueryResult $queryResult) {
+                return $queryResult->resultRows;
             },function ($er){
                 throw new \Exception($er);
             });
@@ -60,19 +63,22 @@ final class SubCategoryServices{
         });
     }
     public function findByCategoryId($user_id, $category_id): PromiseInterface{
-        $groupBy = "GROUP BY sub_category";
-        $productServices = new \App\Services\ProductServices($this->database);
-        return $productServices->noOfProductQuery($user_id, $groupBy)->then(function ($products) use ($category_id) {
-            
-            $query = "SELECT subcategory.* FROM subcategory 
+        $userServices = new \App\Services\UserServices($this->database);
+        return $userServices->findOne($user_id)->then(function ($user) use ($category_id) {
+
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+
+            $query = $this->productCountQuery($user_lat, $user_long);
+
+            $query = "SELECT subcategory.*, $query
+                    FROM subcategory
                     WHERE subcategory.category_id = '$category_id'
                     ORDER BY `idx` ";
-
-            return $this->db->query($query)->then(function (QueryResult $queryResult) use ($products) {
-                $subcategories =  $queryResult->resultRows;
-                $result = $this->getNumberOfProduct($subcategories, $products);
-
-                return $result;
+            
+            return $this->db->query($query)->then(function (QueryResult $queryResult) {
+                return $queryResult->resultRows;
             },function ($er){
                 throw new \Exception($er);
             });
@@ -81,35 +87,24 @@ final class SubCategoryServices{
         });
     }
 
-    public function findAll2($user_id): PromiseInterface{
-        return $this->db->query("SELECT subcategory.*
-                                ,(SELECT COUNT(DISTINCT product.id) FROM product 
-                                    WHERE product.sub_category = subcategory.sub_category_id
-                                ) as no_of_products
-
-                                FROM subcategory
-                                ORDER BY `idx` ")
-            ->then(function (QueryResult $queryResult) use ($user_id) {
-                $rows = $queryResult->resultRows;
-                return $rows;
-            });
-    }
 
     public function findOne($id, $user_id): PromiseInterface{
-        $groupBy = "GROUP BY sub_category";
-        $productServices = new \App\Services\ProductServices($this->database);
-        return $productServices->noOfProductQuery($user_id, $groupBy)->then(function ($products) use ($id) {
+        $userServices = new \App\Services\UserServices($this->database);
+        return $userServices->findOne($user_id)->then(function ($user) use ($id) {
+
+            $user = (object)$user;
+            $user_lat = $user->address_lat;
+            $user_long = $user->address_long;
+
+            $query = $this->productCountQuery($user_lat, $user_long);
+
+            $query = "SELECT subcategory.*, $query
+                    FROM subcategory
+                    WHERE subcategory.sub_category_id = '$id'
+                    ORDER BY `idx` ";
             
-            $query = "SELECT subcategory.* FROM subcategory WHERE `sub_category_id` = $id  ";
-            return $this->db->query($query)->then(function (QueryResult $queryResult) use ($products) {
-                if (empty($queryResult->resultRows)) {
-                    return [];
-                }
-
-                $subcategories =  $queryResult->resultRows;
-                $result = $this->getNumberOfProduct($subcategories, $products);
-
-                return $result[0];
+            return $this->db->query($query)->then(function (QueryResult $queryResult) {
+                return $queryResult->resultRows;
             },function ($er){
                 throw new \Exception($er);
             });

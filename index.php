@@ -62,14 +62,17 @@ $userAuth1 = new Guard('/v1/users/me', $authenticator);
 $userAuth2 = new Guard('/v1/users/address', $authenticator);
 $userAuth3 = new Guard('/v1/users/user', $authenticator);//--> /users/{user_id}
 $coinsAuth = new Guard('/v1/coins', $authenticator);
+$faqsAuth = new Guard('/v1/faqs', $authenticator);
+$feedbackAuth = new Guard('/v1/feedback', $authenticator);
+$reportedproductsAuth = new Guard('/v1/reportedproducts', $authenticator);
 
 // Add routes to the server
 $server = new React\Http\Server(
     $loop, 
     // new JsonRequestDecoder(),
     // new \React\Http\Middleware\RequestBodyBufferMiddleware(20 * 1024 * 1024), // 20 MiB per request
-    new \React\Http\Middleware\StreamingRequestMiddleware(),//To use stream data chunk
-    new \React\Http\Middleware\RequestBodyParserMiddleware(),
+    // new \React\Http\Middleware\StreamingRequestMiddleware(),//To use stream data chunk
+    // new \React\Http\Middleware\RequestBodyParserMiddleware(),
     $productAuth, 
     $catAuth, 
     $subCatAuth, 
@@ -80,12 +83,16 @@ $server = new React\Http\Server(
     $userAuth2,
     $userAuth3,
     $coinsAuth,
+    $faqsAuth,
+    $feedbackAuth,
+    $reportedproductsAuth,
     new \App\Router($routes)
 );
 
 
 //open the socket
 $socket = new \React\Socket\Server(8088, $loop);
+// $socket = new \React\Socket\Server("199.192.27.225:8088", $loop);
 
 $server->listen($socket);
 

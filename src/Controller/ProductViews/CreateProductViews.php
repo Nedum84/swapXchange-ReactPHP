@@ -18,31 +18,19 @@ final class CreateProductViews{
     }
 
     public function __invoke(ServerRequestInterface $request){
-        $body = $request->getBody();
-
-        return new \React\Promise\Promise(function ($resolve) use ($body, $request) {
-            $requestBody='';
-            $body->on('data', function ($chunk) use (&$requestBody) {
-                $requestBody .= $chunk;
-            });
-            $body->on('close', function () use ($resolve, &$requestBody, $request) {
-                $body             = json_decode($requestBody, true);
-                $product_id       = $body['product_id'] ?? ''; 
-                //User details...
-                $user_id = \App\Utils\GetAuthPayload::getPayload($request)->user_id;
-                $resolve(
-                    $this->productViewsServices->create($user_id, $product_id) 
-                       ->then(
-                           function ($response) {
-                            return JsonResponse::ok($response);
-                           },
-                           function ($error) {
-                               return JsonResponse::badRequest($error->getMessage()??$error);
-                           }
-                    )
+        $body = json_decode((string) $request->getBody(), true);
+        $product_id       = $body['product_id'] ?? ''; 
+        //User details...
+        $user_id = \App\Utils\GetAuthPayload::getPayload($request)->user_id;
+            return $this->productViewsServices->create($user_id, $product_id) 
+               ->then(
+                   function ($response) {
+                    return JsonResponse::ok($response);
+                   },
+                   function ($error) {
+                       return JsonResponse::badRequest($error->getMessage()??$error);
+                   }
                 );
-            });
-        });
 
     }
 }

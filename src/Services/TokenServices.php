@@ -22,7 +22,7 @@ final class TokenServices{
     }
 
 
-    public function generateToken(string $user_id, string $uid = null):PromiseInterface{
+    public function generateToken(string $user_id, string $uid = null, $user_level = null):PromiseInterface{
 
         // $accessExpires = strtotime("+ 30 days");
         $accessExpires = strtotime("+ 7 days");
@@ -35,7 +35,8 @@ final class TokenServices{
             "exp" => $accessExpires,//a timestamp of when the token should cease to be valid. Should be greater than iat and nbf
             "data"=>array(
                     "user_id"=>$user_id, 
-                    "uid"=>$uid
+                    "uid"=>$uid,
+                    "user_level"=>$user_level
                 )
         );
         $refreshPayload = array(
@@ -46,7 +47,8 @@ final class TokenServices{
             "exp" => $refreshExpires,
             "data"=>array(
                 "user_id"=>$user_id, 
-                "uid"=>$uid
+                "uid"=>$uid,
+                "user_level"=>$user_level
             )
         );
         $jwt = new JwtEncoder();
@@ -98,16 +100,17 @@ final class TokenServices{
         
         $user_id    = $refresh["data"]->user_id;
         $uid        = $refresh["data"]->uid;
+        $user_level = $refresh["data"]->user_level;
         if(empty($user_id)||empty($uid))
             return $response::rejectPromise();
 
         return $this->findByToken($refresh_token, $user_id)
-            ->then(function (array $dbToken) use ($uid, $user_id) {
+            ->then(function (array $dbToken) use ($uid, $user_id, $user_level) {
                 if(count($dbToken)==0){
                     return [];
                 }
 
-                return $this->generateToken($user_id, $uid);
+                return $this->generateToken($user_id, $uid, $user_level);
             });
     }
 

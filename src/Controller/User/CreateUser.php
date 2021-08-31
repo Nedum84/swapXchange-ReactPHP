@@ -23,86 +23,74 @@ final class CreateUser{
     }
 
     public function __invoke(ServerRequestInterface $request){
-        // $body = json_decode((string) $request->getBody(), true);
-        $body = $request->getBody();
+        $body = json_decode((string) $request->getBody(), true);
+        $user = new \App\Models\UserModel();
+        $user->uid        = $body['uid'] ?? ''; 
+        $user->name      = $body['name'] ?? ''; 
+        $user->email          = $body['email'] ?? ''; 
+        $user->mobile_number      = $body['mobile_number'] ?? ''; 
+        $user->address             = $body['address'] ?? ''; 
+        $user->address_lat      = $body['address_lat'] ?? ''; 
+        $user->address_long     = $body['address_long'] ?? ''; 
+        $user->state            = $body['state'] ?? '';  
+        $user->profile_photo    = $body['profile_photo'] ?? ''; 
+        $user->device_token     = $body['device_token'] ?? ''; 
+        $user->online_status    = $body['online_status']; 
+        $user->user_app_version = $body['user_app_version'] ?? ''; 
+        $user->notification     = \json_encode($body['notification'] ?? (object)$user->defaultNotification); 
+        $user->last_login       = date("Y-m-d H:i:s",\time()); 
 
-        return new \React\Promise\Promise(function ($resolve) use ($body) {
-            $requestBody='';
-            $body->on('data', function ($chunk) use (&$requestBody) {
-                $requestBody .= $chunk;
+
+        //Check if the uuid(uid) is already registered
+        return $this->userServices->findByUid($user->uid)
+            ->then(function(array $oldUser) use ($user) {
+                //If already registered, return the user
+                if(count($oldUser)!=0&&!empty($oldUser)){ 
+                    //Update user
+                    if(empty($oldUser['name'])){
+                        $update = $this->userServices->update($user, $oldUser["user_id"]);
+                    }else{
+                        $update = $this->userServices->updateLastLogin($user, $oldUser["user_id"]);
+                    }
+                    return $update->then(function($user) {
+                            if(gettype($user)!=="array"){
+                                return JsonResponse::badRequest($user);
+                            };
+                            //Fetch token...
+                            return $this->tokenServices->generateToken($user['user_id'], $user['uid'], $user['user_level'])->then(
+                                function(array $tokens) use ($user){
+                                return JsonResponse::ok(["user" => $user,"tokens"=>$tokens]);
+                            }); 
+                        },
+                        function (\Exception $error) {
+                            return JsonResponse::badRequest($error);
+                    });
+                }
+
+                //Register a new user
+                return $this->userServices->create($user)
+                    ->then(function($user) {
+                        if(gettype($user)!=="array"){
+                            return JsonResponse::badRequest($user);
+                        };
+
+                        //Add Registration Coins Bonus
+                        $amount = 500;
+                        $methodOfSub = "registration";
+                        $reference = $user['uuid']."-".$user['user_id'];
+                        return $this->coinsServices->create($user['user_id'], $amount, $reference, $methodOfSub)
+                        ->then(function ($balance) use ($user) {
+                            //Fetch token...
+                            return $this->tokenServices->generateToken($user['user_id'], $user['uid'], $user['user_level'])->then(
+                                function(array $tokens) use ($user){
+                                return JsonResponse::ok(["user" => $user,"tokens"=>$tokens]);
+                            }); 
+                        });
+                    },
+                    function (\Exception $error) {
+                        return JsonResponse::badRequest($error->getMessage());
+                    });
             });
-            $body->on('close', function () use ($resolve,&$requestBody) {
-                $body               = json_decode($requestBody, true);
-                $user = new \App\Models\UserModel();
-                $user->uid        = $body['uid'] ?? ''; 
-                $user->name      = $body['name'] ?? ''; 
-                $user->email          = $body['email'] ?? ''; 
-                $user->mobile_number      = $body['mobile_number'] ?? ''; 
-                $user->address             = $body['address'] ?? ''; 
-                $user->address_lat      = $body['address_lat'] ?? ''; 
-                $user->address_long     = $body['address_long'] ?? ''; 
-                $user->state            = $body['state'] ?? '';  
-                $user->profile_photo    = $body['profile_photo'] ?? ''; 
-                $user->device_token     = $body['device_token'] ?? ''; 
-                $user->online_status    = $body['online_status']; 
-                $user->user_app_version = $body['user_app_version'] ?? ''; 
-                $user->notification     = \json_encode($body['notification'] ?? (object)$user->defaultNotification); 
-                $user->last_login       = date("Y-m-d H:i:s",\time()); 
-
-
-                $resolve(
-                    //Check if the uuid(uid) is already registered
-                    $this->userServices->findByUid($user->uid)
-                        ->then(function(array $oldUser) use ($user) {
-                            //If already registered, return the user
-                            if(count($oldUser)!=0&&!empty($oldUser)){ 
-                                //Update user
-                                if(empty($oldUser['name'])){
-                                    $update = $this->userServices->update($user, $oldUser["user_id"]);
-                                }else{
-                                    $update = $this->userServices->updateLastLogin($user, $oldUser["user_id"]);
-                                }
-                                return $update->then(function($user) {
-                                        if(gettype($user)!=="array"){
-                                            return JsonResponse::badRequest($user);
-                                        };
-                                        //Fetch token...
-                                        return $this->tokenServices->generateToken($user['user_id'],$user['uid'])->then(
-                                            function(array $tokens) use ($user){
-                                            return JsonResponse::ok(["user" => $user,"tokens"=>$tokens]);
-                                        }); 
-                                    },
-                                    function (\Exception $error) {
-                                        return JsonResponse::badRequest($error);
-                                });
-                            }
-
-                            //Register a new user
-                            return $this->userServices->create($user)
-                                ->then(function($user) {
-                                    if(gettype($user)!=="array"){
-                                        return JsonResponse::badRequest($user);
-                                    };
-
-                                    //Add Registration Coins Bonus
-                                    $amount = 500;
-                                    $methodOfSub = "registration";
-                                    return $this->coinsServices->create($user['user_id'], $amount, "", $methodOfSub)
-                                    ->then(function ($balance) use ($user) {
-                                        //Fetch token...
-                                        return $this->tokenServices->generateToken($user['user_id'],$user['uid'])->then(
-                                            function(array $tokens) use ($user){
-                                            return JsonResponse::ok(["user" => $user,"tokens"=>$tokens]);
-                                        }); 
-                                    });
-                                },
-                                function (\Exception $error) {
-                                    return JsonResponse::badRequest($error->getMessage());
-                                });
-                        })
-                );
-            });
-        });
 
 
 

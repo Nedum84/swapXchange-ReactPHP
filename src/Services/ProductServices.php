@@ -95,6 +95,17 @@ final class ProductServices{
             ";
     }
 
+    function distanceBw($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo){
+        $rad = M_PI / 180;
+        //Calculate distance from latitude and longitude
+        $theta = $longitudeFrom - $longitudeTo;
+        $dist = sin($latitudeFrom * $rad) 
+            * sin($latitudeTo * $rad) +  cos($latitudeFrom * $rad)
+            * cos($latitudeTo * $rad) * cos($theta * $rad);
+
+        return acos($dist) / $rad * 60 *  1.853;
+    }
+    
     //Adding number of products on category/subcategory row results
     public function noOfProductQuery($user_id, $groupBy = "GROUP BY category"): PromiseInterface{
         $userServices = new \App\Services\UserServices($this->database);
@@ -104,30 +115,55 @@ final class ProductServices{
             $user = (object)$user;
             $user_lat = $user->address_lat;
             $user_long = $user->address_long;
-            // $user_lat = 36.6103179;
-            // $user_long = -121.8449227;
             $product_status = self::ACTIVE_PRODUCT_STATUS;
             $radius = self::RADIUS;
 
-            $query ="SELECT 
-                        category,
-                        sub_category,
-                        COUNT(product.product_id) as no_of_products
-                        ,(((acos(sin(('$user_lat'*pi()/180)) * 
-                        sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
-                        * 
-                        cos((`user_address_lat`*pi()/180)) * 
-                        cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
-                        AS distance
+            $query = "SELECT 
+                        A.sub_category
+                        ,A.Total
+                        -- A.user_address_lat,
+                        -- A.user_address_long
+                    FROM
+                        (SELECT distinct sub_category,
+                            (SELECT COUNT(product_id)
+                                FROM product I2 
+                                WHERE I2.sub_category = I1.sub_category
+                            ) Total
+                            -- (SELECT
+                            --     COUNT(
+                            --         (((acos(sin(('$user_lat'*pi()/180)) * 
+                            --         sin((`user_address_lat`*pi()/180))+cos(('$user_lat'*pi()/180))
+                            --         *  cos((`user_address_lat`*pi()/180)) * 
+                            --         cos((('$user_long'- `user_address_long`)*pi()/180))))*180/pi())*60*1.1515)
+                            --     )
+                            --     FROM product I2 
+                            --     WHERE I2.sub_category = I1.sub_category
+                            -- ) Total
 
-                    from product 
-                    WHERE product_status = '$product_status'
-                    $groupBy 
-                    having distance < '$radius'
+                        FROM product I1
+                        ) A
+                    -- where Total < '$radius' 
                     ";
 
             return $this->db->query($query)
-            ->then(function (QueryResult $queryResult) {
+            ->then(function (QueryResult $queryResult) use ($user_lat, $user_long) {
+                // $results = [];
+                // foreach ($queryResult->resultRows as $product) {
+                //     $latTo = \floatval($product["user_address_lat"]);
+                //     $longTo = \floatval($product["user_address_long"]);
+                //     $user_lat = \floatval($user_lat);
+                //     $user_long = \floatval($user_long);
+
+                //     $distanceMiles  = $this->distanceBw($user_lat, $user_long, $latTo, $longTo);
+                //     $distanceKm = $distanceMiles/1.609344;
+
+                //     if($distanceKm<self::RADIUS){
+                //         $result[] = $product;
+                //     }
+                // }
+
+                var_dump($queryResult->resultRows);
+
                 return $queryResult->resultRows;
             },function ($er){
                 throw new \Exception($er);

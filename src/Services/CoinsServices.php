@@ -78,6 +78,67 @@ final class CoinsServices{
             });
     }
 
+    //Check if already gotten registration
+    public function checkRegistrationBonus($meta, $user_id){
+        foreach ($meta as $transaction) {
+            $mos = $transaction['method_of_subscription'];
+            if ($transaction["user_id"]==$user_id && $mos == "registration") {
+                return true;
+                break;
+            }
+        }
+
+        return false;
+    }
+
+    //Check already gotten daily rewards
+    public function checkDailyReward($meta, $user_id){
+        foreach ($meta as $transaction) {
+            //same day
+            if ($transaction["user_id"]==$user_id) {
+                $created_at = $transaction['created_at'];
+                $created_at = \date('Y-m-d', \strtotime($created_at));
+                $now = \date('Y-m-d', \time());
+
+                if($created_at==$now){
+                    return true;
+                    break;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    //Check if already gotten registration
+    public function verifyReference($reference){
+        //The parameter after verify/ is the transaction reference to be verified
+        $url = "https://api.paystack.co/transaction/verify/$reference";
+        $sk_key = "sk_test_9cd3e56e95f4abea6a56643e45ca3f606210effc";
+        // $sk_key = "sk_live_1627b9cf52161b293eafcd2a5d3a9b68a0a2d726";
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt(
+            $ch, CURLOPT_HTTPHEADER, [
+            "Authorization: Bearer $sk_key"]
+        );
+        $request = curl_exec($ch);
+        curl_close($ch);
+
+        if ($request) {
+            $result = json_decode($request, true);
+            
+            if($result['data']){
+                if($result['data']['status'] == 'success'){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
 
     public function create(int $user_id, int $amount, $reference, $method_of_subscription): PromiseInterface {
@@ -87,22 +148,98 @@ final class CoinsServices{
         }else if(empty($method_of_subscription)){
             return $promiseResponse::rejectPromise("No method of payment detected");
         }
-        
-        $query  = "INSERT INTO `coins` (`id`, `user_id`, `amount`, `reference`, `method_of_subscription`) 
-            VALUES (?, ?, ?, ?, ?)";
 
-        return $this->db->query($query, 
-            [
-                NULL,
-                $user_id,
-                $amount,
-                $reference,
-                $method_of_subscription
-            ])->then(function () use ($user_id) {
-            return $this->getBalance($user_id);
-        },
-        function (\Exception $error) {
-            return "Error: $error";
+        //Check my duplicate trasaction ref
+        return $this->db->query('SELECT * FROM coins WHERE reference = ? ', [$reference])
+        ->then(function (QueryResult $queryResult) use ($user_id, $amount, $reference, $method_of_subscription) {
+            if (!empty($queryResult->resultRows)) {
+                return "Duplicate transaction ref not allowed";
+            }
+            //--> Continue...
+            return $this->findAllByUserId($user_id)
+            ->then(function ($balance) use ($user_id, $amount, $reference, $method_of_subscription) {
+
+                //Methods of subs(registration, purchase, watch_video, daily_opening, invitation, transfer, coupon)
+                $methodOfSubs = ["registration", "purchase", "watch_video", "daily_opening", "invitation", "transfer", "coupon"];
+                $allowedMethods = ["registration", "purchase", "daily_opening"];
+                if (!in_array($method_of_subscription, $methodOfSubs)) {
+                    return "Invalid method of subscription";
+                }elseif (!in_array($method_of_subscription, $allowedMethods)) {
+                    return "Method of subscription not allowed currently";
+                }elseif(empty($balance)){
+                    return "User authentication failed";
+                }elseif ($method_of_subscription=="registration") {
+                    //Check if user has alerady gotten this reg bonus
+                    $checkRegBonus = $this->checkRegistrationBonus($balance["meta"], $user_id);
+                    if($checkRegBonus){
+                        return "User already claimed registration bonus";
+                    }
+                }else if ($method_of_subscription=="purchase") {
+                    //paystack check for reference valid
+                    $verify = $this->verifyReference($reference);
+                    if (!$verify) {
+                        return "Invalid reference";
+                    }
+                }else if ($method_of_subscription=="daily_opening") {
+                    //Check if already gotten today's reward
+                    $checkDaily = $this->checkDailyReward($balance["meta"], $user_id);
+                    if ($checkDaily) {
+                        return "You can't receive daily coins twice per daily. try again tomorrow";
+                    }
+                }
+                $last_credit = $balance["last_credit"];
+                $last_amount = $last_credit['amount'];
+                $last_reference = $last_credit['reference'];
+                $last_mos = $last_credit['method_of_subscription'];
+                $last_created_at = $last_credit['created_at'];
+                // $last_current_time = $last_credit['current_time'];
+
+                if ($last_mos=="registration" && $method_of_subscription=="registration") {
+                    return "Registration bonus can be received once";
+                } 
+                if ($method_of_subscription=="registration" && $amount!=500) {
+                    return "Invalid amount";
+                } 
+                if ($method_of_subscription=="daily_opening" && $amount!=10) {
+                    return "Invalid amount";
+                } 
+                if ($method_of_subscription=="purchase") {
+                    $purchaseAmounts = [500, 1000, 5000];
+                    if(!\in_array($amount, $purchaseAmounts)){
+                        return "Invalid amount for this reference::1";
+                    }
+                    //XPCOHN6CDN_5000_31_2300-> rand_no, coin_amount, user_id, purchased_amount
+                    $purchaseAmounts = \explode("_",$reference);
+                    if(\count($purchaseAmounts)<3){
+                        return "Invalid reference number";
+                    }
+                    $coinsAmount = intval($purchaseAmounts[1]);
+                    if($coinsAmount!=$amount){
+                        return "Invalid amount for this reference::2";
+                    }
+                } 
+        
+                $query  = "INSERT INTO `coins` (`id`, `user_id`, `amount`, `reference`, `method_of_subscription`) 
+                    VALUES (?, ?, ?, ?, ?)";
+        
+                return $this->db->query($query, 
+                    [
+                        NULL,
+                        $user_id,
+                        $amount,
+                        $reference,
+                        $method_of_subscription
+                    ])->then(function () use ($user_id) {
+                    return $this->getBalance($user_id);
+                },
+                function (\Exception $error) {
+                    return "Error: $error";
+                });
+            },
+            function (\Exception $error) {
+                return "Error: $error";
+            });
+
         });
     }
 }
